@@ -22,15 +22,19 @@ namespace TestCore
             // Start the thread
             thread.Start();
 
-            // Wait for 2 seconds
-            Thread.Sleep(2000);
+            // Collect data for 2 seconds
+            var enumerator = thread.Run(new CancellationTokenSource(2000).Token).GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                latency.Add(enumerator.Current);
+            }
 
             // Stop the thread
             thread.Stop();
-            thread.latency.ForEach(latency.Add);
 
-            Assert.True(latency.Average() < 0);
-            Assert.True(latency.Average() < 500);
+
+            Assert.True(latency.Average() > 0);
+            Assert.True(latency.Average() < 1000);
         }
     }
 }

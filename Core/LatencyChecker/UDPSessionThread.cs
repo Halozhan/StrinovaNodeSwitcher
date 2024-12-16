@@ -7,20 +7,18 @@ namespace Core.LatencyChecker
     public class UDPSessionThread
     {
         private readonly UDPSession _session;
-        public List<float> latency;
-        private Thread thread;
-        private CancellationTokenSource _cancellationTokenSource;
+        private Thread? thread;
+        private CancellationTokenSource? _cancellationTokenSource;
 
         public UDPSessionThread(UDPSession session)
         {
             _session = session;
-            latency = [];
         }
 
         public void Start()
         {
             _cancellationTokenSource = new CancellationTokenSource();
-            thread = new Thread(() => Run(_cancellationTokenSource.Token))
+            thread = new Thread(() => Run(_cancellationTokenSource.Token).GetEnumerator().MoveNext())
             {
                 IsBackground = true
             };
@@ -33,7 +31,7 @@ namespace Core.LatencyChecker
             thread?.Join();
         }
 
-        private void Run(CancellationToken token)
+        public IEnumerable<float> Run(CancellationToken token)
         {
             Stopwatch stopwatch = new();
 
@@ -65,7 +63,7 @@ namespace Core.LatencyChecker
                         if (Encoding.ASCII.GetString(_session.sendBytes) != Encoding.ASCII.GetString(receiveBytes))
                         {
                             // Wrong packet received
-                            latency.Add(-1);
+                            yield return -1;
                             lossCountDuringSession++;
                             continue;
                         }
@@ -73,13 +71,13 @@ namespace Core.LatencyChecker
                         // 핑이 1000ms 초과하면
                         if (stopwatch.ElapsedMilliseconds > 1000)
                         {
-                            latency.Add(-1);
+                            yield return -1;
                             lossCountDuringSession++;
                             continue;
                         }
 
                         // Add latency to the list
-                        latency.Add(stopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000);
+                        yield return stopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000;
                     }
                 }
             }
