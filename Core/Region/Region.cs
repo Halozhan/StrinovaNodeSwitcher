@@ -1,0 +1,16 @@
+﻿using Core.Node;
+using System.Net;
+
+namespace Core.Region
+{
+    public class Region
+    {
+        public string Name { get; }
+        public readonly List<Node.Node> Nodes = [];
+
+        public Region(string name)
+        {
+            Name = name;
+        }
+    }
+}
