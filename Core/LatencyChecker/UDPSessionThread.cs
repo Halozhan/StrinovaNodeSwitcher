@@ -7,7 +7,6 @@ namespace Core.LatencyChecker
     public class UDPSessionThread
     {
         private readonly UDPSession _session;
-        private Thread? thread;
         private CancellationTokenSource? _cancellationTokenSource;
 
         public UDPSessionThread(UDPSession session)
@@ -18,20 +17,14 @@ namespace Core.LatencyChecker
         public void Start()
         {
             _cancellationTokenSource = new CancellationTokenSource();
-            thread = new Thread(() => Run(_cancellationTokenSource.Token).GetEnumerator().MoveNext())
-            {
-                IsBackground = true
-            };
-            thread.Start();
         }
 
         public void Stop()
         {
             _cancellationTokenSource?.Cancel();
-            thread?.Join();
         }
 
-        public IEnumerable<float> Run(CancellationToken token)
+        public async IAsyncEnumerable<float> Run(CancellationToken token)
         {
             Stopwatch stopwatch = new();
 
@@ -55,7 +48,7 @@ namespace Core.LatencyChecker
                         stopwatch.Start();
 
                         // Receive data
-                        byte[] receiveBytes = _session.ReceiveData(udpClient);
+                        byte[] receiveBytes = await _session.ReceiveDataAsync(udpClient);
                         stopwatch.Stop();
 
 
