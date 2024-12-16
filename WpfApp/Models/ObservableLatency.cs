@@ -1,31 +1,28 @@
-﻿using Core.LatencyChecker;
-using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Core.LatencyChecker;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace WpfApp.Models
 {
-    public class ObservableLatency : INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class ObservableLatency
     {
-        private readonly Latency _latency;
+        [ObservableProperty]
+        private Latency _latency;
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        [ObservableProperty]
+        private LatencyService latencyService;
 
         public ObservableLatency()
         {
-            _latency = new();
+            Latency = new();
+            LatencyService = new(Latency);
         }
 
-        public ObservableCollection<float> LatencyList => new(_latency.LatencyList);
 
         public void Add(float ping)
         {
-            _latency.Add(ping);
+            Latency.Add(ping);
             OnPropertyChanged(nameof(Average));
             //OnPropertyChanged(nameof(Min));
             //OnPropertyChanged(nameof(Max));
@@ -36,7 +33,7 @@ namespace WpfApp.Models
 
         public void Clear()
         {
-            _latency.Clear();
+            Latency.Clear();
             OnPropertyChanged(nameof(Average));
             //OnPropertyChanged(nameof(Min));
             //OnPropertyChanged(nameof(Max));
@@ -45,13 +42,21 @@ namespace WpfApp.Models
             //OnPropertyChanged(nameof(Score));
         }
 
-        public float Average => _latency.LatencyList.Average();
+        public float Average
+        {
+            get
+            {
+                if (Latency.LatencyList.Count == 0)
+                {
+                    return 0;
+                }
+                return LatencyService.GetAverage();
+            }
+        }
         //public float Min => latencyService.GetMin();
         //public float Max => latencyService.GetMax();
         //public float LossRate => latencyService.GetLossRate();
         //public float StandardDeviation => latencyService.GetStandardDeviation();
         //public float Score => latencyService.GetScore();
-
-        public Latency GetLatency() => _latency;
     }
 }

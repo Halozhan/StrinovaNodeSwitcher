@@ -5,9 +5,9 @@ namespace Core.Node
 {
     public class Node
     {
-        public IPAddress? IPAddress { get; set; }
-        public int Port { get; set; }
-        public Latency Latency { get; set; }
+        public virtual IPAddress? IPAddress { get; set; }
+        public virtual int Port { get; set; }
+        public virtual Latency Latency { get; set; }
 
         public Node(IPAddress address, int port)
         {

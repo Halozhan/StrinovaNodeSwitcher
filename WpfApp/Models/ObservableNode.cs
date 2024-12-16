@@ -1,4 +1,5 @@
-﻿using Core.LatencyChecker;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Core.LatencyChecker;
 using Core.Node;
 using System;
 using System.Collections.Generic;
@@ -11,34 +12,20 @@ using System.Threading.Tasks;
 
 namespace WpfApp.Models
 {
-    public class ObservableNode : Node, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class ObservableNode : Node
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        public override IPAddress? IPAddress
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "")
-        {
-            if (Equals(field, value)) return false;
-            field = value;
-            OnPropertyChanged(propertyName);
-            return true;
-        }
-
-        public string Address
-        {
-            get => base.IPAddress.ToString();
+            get => base.IPAddress;
             set
             {
-                base.IPAddress = IPAddress.Parse(value);
+                base.IPAddress = value;
                 OnPropertyChanged();
             }
         }
 
-        public new int Port
+        public override int Port
         {
             get => base.Port;
             set
@@ -48,20 +35,21 @@ namespace WpfApp.Models
             }
         }
 
-        private ObservableLatency _latency;
-        public new ObservableLatency Latency
+        private ObservableLatency _observableLatency;
+        public ObservableLatency ObservableLatency
         {
-            get => _latency;
+            get => _observableLatency;
             set
             {
-                _latency = value;
+                _observableLatency = value;
+                Latency = _observableLatency.Latency;
                 OnPropertyChanged();
             }
         }
 
         public ObservableNode(IPAddress address, int port) : base(address, port)
         {
-            _latency = new ObservableLatency();
+            _observableLatency = new ObservableLatency();
         }
     }
 }

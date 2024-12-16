@@ -1,14 +1,11 @@
 ﻿using Core.LatencyChecker;
-using Core.Node;
-using System.Threading;
-using System.Xml.Linq;
 
 namespace TestCore
 {
     public class UDPSessionThreadTest
     {
         [Fact]
-        public void ThreadTest()
+        public async void ThreadTest()
         {
             // Strinova South Korea Edge-One Global Accelerator IP
             var address = System.Net.IPAddress.Parse("43.155.193.230");
@@ -22,11 +19,15 @@ namespace TestCore
             // Start the thread
             thread.Start();
 
-            // Collect data for 2 seconds
-            var enumerator = thread.Run(new CancellationTokenSource(2000).Token).GetEnumerator();
-            while (enumerator.MoveNext())
+            // Collect data for 100 pings
+            var token = new CancellationTokenSource();
+            await foreach (var ping in thread.Run(token.Token))
             {
-                latency.Add(enumerator.Current);
+                latency.Add(ping);
+                if (latency.Count >= 100)
+                {
+                    break;
+                }
             }
 
             // Stop the thread
