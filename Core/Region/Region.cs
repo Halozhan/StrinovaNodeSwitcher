@@ -1,7 +1,4 @@
-﻿using Core.Node;
-using System.Net;
-
-namespace Core.Region
+﻿namespace Core.Region
 {
     public class Region
     {
