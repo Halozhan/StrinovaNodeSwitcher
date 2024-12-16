@@ -1,4 +1,5 @@
-﻿using Core.Region;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Core.Region;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,7 +9,8 @@ using System.Threading.Tasks;
 
 namespace WpfApp.ViewModels
 {
-    public class RegionViewModel : ObservableObject
+    [INotifyPropertyChanged]
+    public partial class RegionViewModel
     {
         public RegionViewModel(Region region)
         {

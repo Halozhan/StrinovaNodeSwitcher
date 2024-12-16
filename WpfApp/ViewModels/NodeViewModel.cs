@@ -1,31 +1,26 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Core.LatencyChecker;
 using Core.Node;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using WpfApp.Models;
 
 namespace WpfApp.ViewModels
 {
     [INotifyPropertyChanged]
     public partial class NodeViewModel
     {
-        //private readonly ObservableNode _node;
         [ObservableProperty]
         private Node _node;
 
-        //private ObservableLatency _latency;
-        //[ObservableProperty]
-        //private Latency _latency;
+        [ObservableProperty]
+        private LatencyService _latencyService;
 
         private UDPSessionThread _udpSessionThread;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public NodeViewModel(ObservableNode node)
+        public NodeViewModel(Node node)
         {
             Node = node;
-            //_latency = new();
+            LatencyService = new LatencyService(Node.Latency);
 
             var session = new UDPSession(Node.IPAddress, Node.Port);
             _udpSessionThread = new UDPSessionThread(session);
@@ -39,14 +34,7 @@ namespace WpfApp.ViewModels
 
         public float Latency
         {
-            get
-            {
-                if (Node.Latency.LatencyList.Count == 0)
-                {
-                    return 0;
-                }
-                return Node.Latency.LatencyList.Average();
-            }
+            get => LatencyService.GetAverage();
         }
 
         public async void StartSessionAsync()
