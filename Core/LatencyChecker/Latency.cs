@@ -2,25 +2,73 @@
 {
     public class Latency
     {
+        private const int MaxCapacity = 1000;
+        private readonly List<float> _latencyList;
+        private readonly ReaderWriterLockSlim _lock;
+
         public Latency()
         {
-            LatencyList = new(1000);
+            _latencyList = new List<float>();
+            _lock = new ReaderWriterLockSlim();
         }
-
-        public readonly List<float> LatencyList;
 
         public void Add(float ping)
         {
-            if (LatencyList.Count >= 1000)
+            _lock.EnterWriteLock();
+            try
             {
-                LatencyList.RemoveAt(0);
+                _latencyList.Add(ping);
+                while (_latencyList.Count > MaxCapacity)
+                {
+                    _latencyList.RemoveAt(0);
+                }
             }
-            LatencyList.Add(ping);
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
 
         public void Clear()
         {
-            LatencyList.Clear();
+            _lock.EnterWriteLock();
+            try
+            {
+                _latencyList.Clear();
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+
+        public List<float> GetLatencyList()
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                return _latencyList;
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+
+        public int Count
+        {
+            get
+            {
+                _lock.EnterReadLock();
+                try
+                {
+                    return _latencyList.Count;
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
+                }
+            }
         }
     }
 }

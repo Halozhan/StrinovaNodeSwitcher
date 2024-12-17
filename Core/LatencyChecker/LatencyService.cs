@@ -2,7 +2,7 @@
 {
     public class LatencyService(Latency latency)
     {
-        private readonly List<float> LatencyList = latency.LatencyList;
+        private readonly List<float> LatencyList = latency.GetLatencyList();
 
         // 이상치 제거
         private List<float> RemoveOutlier()

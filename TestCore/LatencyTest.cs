@@ -10,7 +10,7 @@ namespace TestCore
             Latency latency = new();
             latency.Add(100);
             latency.Add(200);
-            Assert.Equal(2, latency.LatencyList.Count);
+            Assert.Equal(2, latency.GetLatencyList().Count);
         }
 
         [Fact]
@@ -22,7 +22,7 @@ namespace TestCore
                 latency.Add(100);
             }
 
-            Assert.Equal(1000, latency.LatencyList.Count);
+            Assert.Equal(1000, latency.GetLatencyList().Count);
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace TestCore
             latency.Add(100);
             latency.Add(200);
             latency.Clear();
-            Assert.Empty(latency.LatencyList);
+            Assert.Empty(latency.GetLatencyList());
         }
     }
 }
