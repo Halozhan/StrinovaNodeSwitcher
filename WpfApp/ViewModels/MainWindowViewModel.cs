@@ -44,7 +44,7 @@ namespace WpfApp.ViewModels
             int edgeOneIndex = 1;
             int serverIndex = 30;
 
-            Region region = new($"{regionCode}-{(isEdgeOne ? "eo" : "server")}");
+            Region region = new($"{regionCode.ToUpper()}-{(isEdgeOne ? "EdgeOne(Accelerator)" : "LoadBalancer")}");
 
             for (int i = 1; i <= (isEdgeOne ? edgeOneIndex : serverIndex); i++)
             {

@@ -1,13 +1,8 @@
 ﻿namespace Core.LatencyChecker
 {
-    public class LatencyService
+    public class LatencyService(Latency latency)
     {
-        private readonly List<float> LatencyList;
-
-        public LatencyService(Latency latency)
-        {
-            LatencyList = latency.LatencyList;
-        }
+        private readonly List<float> LatencyList = latency.LatencyList;
 
         // 이상치 제거
         private List<float> RemoveOutlier()
@@ -48,10 +43,7 @@
         {
             var list = RemoveOutlier();
             if (list.Count == 0) return -1;
-            // TODO: Check if this is correct
-            //return (float)Math.Sqrt(LatencyList.Average(ping => Math.Pow(ping - GetAverage(), 2)));
-            var latencyListCopy = LatencyList.ToList(); // Create a copy of the list
-            return (float)Math.Sqrt(latencyListCopy.Average(ping => Math.Pow(ping - GetAverage(), 2)));
+            return (float)Math.Sqrt(LatencyList.Average(ping => Math.Pow(ping - GetAverage(), 2)));
         }
 
         public float GetScore()

@@ -6,15 +6,10 @@ using System.Threading;
 
 namespace Core.LatencyChecker
 {
-    public class UDPSessionThread
+    public class UDPSessionThread(UDPSession session)
     {
-        private readonly UDPSession _session;
+        private readonly UDPSession _session = session;
         private CancellationTokenSource? _cancellationTokenSource;
-
-        public UDPSessionThread(UDPSession session)
-        {
-            _session = session;
-        }
 
         public void Start()
         {
@@ -54,7 +49,7 @@ namespace Core.LatencyChecker
                             stopwatch.Start();
 
                             // Receive data
-                            byte[] receiveBytes = await _session.ReceiveDataAsync(udpClient);
+                            byte[] receiveBytes = await UDPSession.ReceiveDataAsync(udpClient);
                             stopwatch.Stop();
 
                             // 보낸 패킷과 받은 패킷이 같은지 확인

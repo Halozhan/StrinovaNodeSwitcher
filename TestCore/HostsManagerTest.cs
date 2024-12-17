@@ -4,7 +4,7 @@ namespace TestCore
 {
     public class HostsManagerTest
     {
-        private string hostsPath = @"hosts";
+        private readonly string hostsPath = @"hosts";
 
         void BeforeTestStarting()
         {

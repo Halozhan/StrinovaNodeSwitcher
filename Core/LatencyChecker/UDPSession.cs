@@ -35,7 +35,7 @@ namespace Core.LatencyChecker
             return udpClient.Receive(ref remoteEndPoint);
         }
 
-        public async Task<byte[]> ReceiveDataAsync(UdpClient udpClient)
+        public static async Task<byte[]> ReceiveDataAsync(UdpClient udpClient)
         {
             try
             {

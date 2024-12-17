@@ -13,8 +13,8 @@ namespace TestCore
 
             List<float> latency = [];
 
-            UDPSession session = new UDPSession(address, port);
-            UDPSessionThread thread = new UDPSessionThread(session);
+            UDPSession session = new(address, port);
+            UDPSessionThread thread = new(session);
 
             // Start the thread
             thread.Start();

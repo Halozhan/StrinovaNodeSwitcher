@@ -15,7 +15,7 @@ namespace WpfApp.ViewModels
         [ObservableProperty]
         private LatencyService _latencyService;
 
-        private UDPSessionThread _udpSessionThread;
+        private readonly UDPSessionThread _udpSessionThread;
         private CancellationTokenSource _cancellationTokenSource;
 
         public NodeViewModel(Node node)
@@ -39,20 +39,16 @@ namespace WpfApp.ViewModels
             _cancellationTokenSource = new CancellationTokenSource();
             try
             {
-                // TODO: To be refactored
-                await Task.Run(async () =>
+                await foreach (var ping in _udpSessionThread.Run(_cancellationTokenSource.Token))
                 {
-                    await foreach (var ping in _udpSessionThread.Run(_cancellationTokenSource.Token))
-                    {
-                        Node.Latency.Add(ping);
-                        OnPropertyChanged(nameof(Average));
-                        OnPropertyChanged(nameof(Min));
-                        OnPropertyChanged(nameof(Max));
-                        OnPropertyChanged(nameof(LossRate));
-                        OnPropertyChanged(nameof(StandardDeviation));
-                        OnPropertyChanged(nameof(Score));
-                    }
-                });
+                    Node.Latency.Add(ping);
+                    OnPropertyChanged(nameof(Average));
+                    OnPropertyChanged(nameof(Min));
+                    OnPropertyChanged(nameof(Max));
+                    OnPropertyChanged(nameof(LossRate));
+                    OnPropertyChanged(nameof(StandardDeviation));
+                    OnPropertyChanged(nameof(Score));
+                }
             }
             catch (TaskCanceledException)
             {

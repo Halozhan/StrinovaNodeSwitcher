@@ -4,8 +4,8 @@ namespace Core.HostsManager
 {
     public sealed class HostsManager
     {
-        private static readonly Lazy<HostsManager> instance = new Lazy<HostsManager>(() => new HostsManager());
-        private static readonly object fileLock = new object();
+        private static readonly Lazy<HostsManager> instance = new(() => new HostsManager());
+        private static readonly object fileLock = new();
         private string hostsPath = @"C:\Windows\System32\drivers\etc\hosts";
 
         private HostsManager() { }
@@ -40,7 +40,7 @@ namespace Core.HostsManager
             {
                 try
                 {
-                    using (StreamReader reader = new StreamReader(hostsPath))
+                    using (StreamReader reader = new(hostsPath))
                     {
                         lines = reader.ReadToEnd().Split('\n');
                     }
@@ -73,7 +73,7 @@ namespace Core.HostsManager
             {
                 try
                 {
-                    using (StreamWriter writer = new StreamWriter(hostsPath, true))
+                    using (StreamWriter writer = new(hostsPath, true))
                     {
                         writer.WriteLine(host.IP + "\t" + host.Hostname);
                     }
@@ -92,7 +92,7 @@ namespace Core.HostsManager
                 string[] lines = ReadHosts();
                 try
                 {
-                    using (StreamWriter writer = new StreamWriter(hostsPath))
+                    using (StreamWriter writer = new(hostsPath))
                     {
                         foreach (var line in lines)
                         {

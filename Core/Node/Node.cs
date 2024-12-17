@@ -3,17 +3,10 @@ using System.Net;
 
 namespace Core.Node
 {
-    public class Node
+    public class Node(IPAddress address, int port)
     {
-        public IPAddress? IPAddress { get; set; }
-        public int Port { get; set; }
-        public Latency Latency { get; set; }
-
-        public Node(IPAddress address, int port)
-        {
-            IPAddress = address;
-            Port = port;
-            Latency = new Latency();
-        }
+        public IPAddress? IPAddress { get; set; } = address;
+        public int Port { get; set; } = port;
+        public Latency Latency { get; set; } = new Latency();
     }
 }
