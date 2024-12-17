@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 
 namespace Core.LatencyChecker
 {
@@ -24,7 +26,7 @@ namespace Core.LatencyChecker
             _cancellationTokenSource?.Cancel();
         }
 
-        public async IAsyncEnumerable<float> Run(CancellationToken token)
+        public async IAsyncEnumerable<float> Run([EnumeratorCancellation] CancellationToken token)
         {
             Stopwatch stopwatch = new();
 
@@ -33,44 +35,57 @@ namespace Core.LatencyChecker
                 using (UdpClient udpClient = new())
                 {
                     int lossCountDuringSession = 0;
+                    udpClient.Client.ReceiveTimeout = 1000; // 1초 타임아웃 설정
                     udpClient.Connect(_session.IPAddress, _session.Port);
                     for (int i = 0; (i < 50) && !token.IsCancellationRequested; i++)
                     {
+                        float result = -1;
                         // 패킷 손실이 3회 이상이면 재연결
                         if (lossCountDuringSession >= 3)
                         {
                             break;
                         }
 
-                        // Send data
-                        _session.SendData(udpClient);
-                        stopwatch.Reset();
-                        stopwatch.Start();
-
-                        // Receive data
-                        byte[] receiveBytes = await _session.ReceiveDataAsync(udpClient);
-                        stopwatch.Stop();
-
-
-                        // 보낸 패킷과 받은 패킷이 같은지 확인
-                        if (Encoding.ASCII.GetString(_session.sendBytes) != Encoding.ASCII.GetString(receiveBytes))
+                        try
                         {
-                            // Wrong packet received
-                            yield return -1;
+                            // Send data
+                            _session.SendData(udpClient);
+                            stopwatch.Reset();
+                            stopwatch.Start();
+
+                            // Receive data
+                            byte[] receiveBytes = await _session.ReceiveDataAsync(udpClient);
+                            stopwatch.Stop();
+
+                            // 보낸 패킷과 받은 패킷이 같은지 확인
+                            if (Encoding.ASCII.GetString(_session.sendBytes) != Encoding.ASCII.GetString(receiveBytes))
+                            {
+                                // Wrong packet received
+                                result = -1;
+                                lossCountDuringSession++;
+                                continue;
+                            }
+
+                            // 핑이 1000ms 초과하면
+                            else if (stopwatch.ElapsedMilliseconds > 1000)
+                            {
+                                result = -1;
+                                lossCountDuringSession++;
+                            }
+                            // Add latency to the list
+                            else
+                            {
+                                result = stopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000;
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Error during UDP session: {ex.Message}");
                             lossCountDuringSession++;
-                            continue;
                         }
 
-                        // 핑이 1000ms 초과하면
-                        if (stopwatch.ElapsedMilliseconds > 1000)
-                        {
-                            yield return -1;
-                            lossCountDuringSession++;
-                            continue;
-                        }
-
-                        // Add latency to the list
-                        yield return stopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000;
+                        yield return result;
                     }
                 }
             }

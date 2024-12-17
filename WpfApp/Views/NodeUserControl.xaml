@@ -11,7 +11,7 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Text="{Binding Address}" Grid.Column="0"/>
-        <TextBlock Text="{Binding Latency}" Grid.Column="1"/>
+        <TextBlock Text="{Binding Node.Address}" Grid.Column="0" Margin="5"/>
+        <TextBlock Text="{Binding Node.Latency}" Grid.Column="1" Margin="5"/>
     </Grid>
 </UserControl>

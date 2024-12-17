@@ -37,8 +37,22 @@ namespace Core.LatencyChecker
 
         public async Task<byte[]> ReceiveDataAsync(UdpClient udpClient)
         {
-            UdpReceiveResult result = await udpClient.ReceiveAsync();
-            return result.Buffer;
+            try
+            {
+                var receiveTask = udpClient.ReceiveAsync();
+                if (await Task.WhenAny(receiveTask, Task.Delay(1000)) == receiveTask)
+                {
+                    return receiveTask.Result.Buffer;
+                }
+                else
+                {
+                    throw new TimeoutException("Receive operation timed out.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error receiving data.", ex);
+            }
         }
     }
 }

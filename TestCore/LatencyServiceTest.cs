@@ -38,7 +38,7 @@ namespace TestCore
         }
 
         [Fact]
-        public void GetLossRateTest()
+        public void GetLossRateTestWithLoss()
         {
             Latency latency = new();
             LatencyService latencyService = new(latency);
@@ -46,6 +46,17 @@ namespace TestCore
             latency.Add(-1);
 
             Assert.Equal(0.5, latencyService.GetLossRate());
+        }
+
+        [Fact]
+        public void GetLossRateTestNoLoss()
+        {
+            Latency latency = new();
+            LatencyService latencyService = new(latency);
+            latency.Add(100);
+            latency.Add(200);
+
+            Assert.Equal(0, latencyService.GetLossRate());
         }
 
         [Fact]

@@ -2,6 +2,7 @@
 using Core.LatencyChecker;
 using Core.Node;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace WpfApp.ViewModels
 {
@@ -22,7 +23,7 @@ namespace WpfApp.ViewModels
             Node = node;
             LatencyService = new LatencyService(Node.Latency);
 
-            var session = new UDPSession(Node.IPAddress, Node.Port);
+            UDPSession session = new(Node.IPAddress, Node.Port);
             _udpSessionThread = new UDPSessionThread(session);
             StartSessionAsync();
         }
@@ -41,16 +42,39 @@ namespace WpfApp.ViewModels
         {
             _udpSessionThread.Start();
             _cancellationTokenSource = new CancellationTokenSource();
-            await foreach (var ping in _udpSessionThread.Run(_cancellationTokenSource.Token))
+            try
             {
-                Node.Latency.Add(ping);
-                OnPropertyChanged(nameof(Latency));
+                await foreach (var ping in _udpSessionThread.Run(_cancellationTokenSource.Token))
+                {
+                    Node.Latency.Add(ping);
+                    OnPropertyChanged(nameof(Latency));
+                    OnPropertyChanged(nameof(LossRate));
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Task is cancelled
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            finally
+            {
+                _udpSessionThread.Stop();
+                Debug.WriteLine("스레드가 종료됨");
             }
         }
 
         public void StopSession()
         {
             _cancellationTokenSource.Cancel();
+            _udpSessionThread.Stop();
+        }
+
+        public float LossRate
+        {
+            get => LatencyService.GetLossRate();
         }
     }
 }

@@ -16,12 +16,12 @@ namespace WpfApp.Views
 {
     public partial class MainWindowView : Window
     {
+        /// <summary>
+        /// Interaction logic for MainWindowView.xaml
+        /// </summary>
         public MainWindowView()
         {
             InitializeComponent();
-            //var vm = new MainWindowViewModel();
-            var vm = new NodeViewModel(new(IPAddress.Parse("43.155.193.230"), 20000));
-            DataContext = vm;
         }
     }
 }
