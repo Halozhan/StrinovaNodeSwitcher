@@ -40,8 +40,8 @@ namespace Core.LatencyChecker
                     for (int i = 0; (i < 50) && !token.IsCancellationRequested; i++)
                     {
                         float result = -1;
-                        // 패킷 손실이 3회 이상이면 재연결
-                        if (lossCountDuringSession >= 3)
+                        // 패킷 손실이 lossCountDuringSession 조건을 만족하면 재연결
+                        if (lossCountDuringSession >= 10)
                         {
                             break;
                         }
@@ -86,6 +86,13 @@ namespace Core.LatencyChecker
                         }
 
                         yield return result;
+
+                        // Calculate delay
+                        long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+                        if (elapsedMilliseconds < 200)
+                        {
+                            await Task.Delay(200 - (int)elapsedMilliseconds, token);
+                        }
                     }
                 }
             }

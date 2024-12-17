@@ -48,7 +48,10 @@
         {
             var list = RemoveOutlier();
             if (list.Count == 0) return -1;
-            return (float)Math.Sqrt(LatencyList.Average(ping => Math.Pow(ping - GetAverage(), 2)));
+            // TODO: Check if this is correct
+            //return (float)Math.Sqrt(LatencyList.Average(ping => Math.Pow(ping - GetAverage(), 2)));
+            var latencyListCopy = LatencyList.ToList(); // Create a copy of the list
+            return (float)Math.Sqrt(latencyListCopy.Average(ping => Math.Pow(ping - GetAverage(), 2)));
         }
 
         public float GetScore()

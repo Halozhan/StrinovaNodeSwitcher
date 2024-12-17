@@ -11,25 +11,34 @@
         <vm:MainWindowViewModel />
     </Window.DataContext>
     <Grid>
-        <ItemsControl ItemsSource="{Binding Regions}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel>
-                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16"/>
-                        <ItemsControl ItemsSource="{Binding Nodes}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Address}" Margin="5"/>
-                                        <TextBlock Text="{Binding Latency}" Margin="5"/>
-                                        <TextBlock Text="{Binding LossRate}" Margin="5"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <ScrollViewer HorizontalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Regions}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="10">
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16"/>
+                            <ListView ItemsSource="{Binding Nodes}">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Header="Address" DisplayMemberBinding="{Binding Address}"/>
+                                        <GridViewColumn Header="Score" DisplayMemberBinding="{Binding Score, StringFormat=N2}"/>
+                                        <GridViewColumn Header="Average" DisplayMemberBinding="{Binding Average, StringFormat=N2}"/>
+                                        <GridViewColumn Header="Loss Rate" DisplayMemberBinding="{Binding LossRate, StringFormat={}{0:P2}}"/>
+                                        <GridViewColumn Header="Minimum" DisplayMemberBinding="{Binding Min, StringFormat=N2}"/>
+                                        <GridViewColumn Header="Maximum" DisplayMemberBinding="{Binding Max, StringFormat=N2}"/>
+                                        <GridViewColumn Header="StandardDeviation" DisplayMemberBinding="{Binding StandardDeviation, StringFormat=N2}"/>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </Window>

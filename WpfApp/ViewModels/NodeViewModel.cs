@@ -33,23 +33,26 @@ namespace WpfApp.ViewModels
             get => Node.IPAddress.ToString();
         }
 
-        public float Latency
-        {
-            get => LatencyService.GetAverage();
-        }
-
-        public async void StartSessionAsync()
+        public async Task StartSessionAsync()
         {
             _udpSessionThread.Start();
             _cancellationTokenSource = new CancellationTokenSource();
             try
             {
-                await foreach (var ping in _udpSessionThread.Run(_cancellationTokenSource.Token))
+                // TODO: To be refactored
+                await Task.Run(async () =>
                 {
-                    Node.Latency.Add(ping);
-                    OnPropertyChanged(nameof(Latency));
-                    OnPropertyChanged(nameof(LossRate));
-                }
+                    await foreach (var ping in _udpSessionThread.Run(_cancellationTokenSource.Token))
+                    {
+                        Node.Latency.Add(ping);
+                        OnPropertyChanged(nameof(Average));
+                        OnPropertyChanged(nameof(Min));
+                        OnPropertyChanged(nameof(Max));
+                        OnPropertyChanged(nameof(LossRate));
+                        OnPropertyChanged(nameof(StandardDeviation));
+                        OnPropertyChanged(nameof(Score));
+                    }
+                });
             }
             catch (TaskCanceledException)
             {
@@ -72,9 +75,34 @@ namespace WpfApp.ViewModels
             _udpSessionThread.Stop();
         }
 
+        public float Average
+        {
+            get => LatencyService.GetAverage();
+        }
+
+        public float Min
+        {
+            get => LatencyService.GetMin();
+        }
+
+        public float Max
+        {
+            get => LatencyService.GetMax();
+        }
+
         public float LossRate
         {
             get => LatencyService.GetLossRate();
+        }
+
+        public float StandardDeviation
+        {
+            get => LatencyService.GetStandardDeviation();
+        }
+
+        public float Score
+        {
+            get => LatencyService.GetScore();
         }
     }
 }

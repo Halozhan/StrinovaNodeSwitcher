@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Core.Region;
+using DnsClient;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Net;
 
 namespace WpfApp.ViewModels
@@ -14,33 +16,52 @@ namespace WpfApp.ViewModels
         public MainWindowViewModel()
         {
             Regions = [];
+            Task.Run(() => LoadRegionsAsync());
+        }
 
-            Region KoreaRegion = new("KR");
-            KoreaRegion.Nodes.Add(new(IPAddress.Parse("43.155.193.230"), 20000));
-            RegionViewModel KoreaVM = new(KoreaRegion);
-            Regions.Add(KoreaVM);
+        private async Task LoadRegionsAsync()
+        {
+            var tasks = new[]
+            {
+                LoadRegionsAsync("kr", false),
+                LoadRegionsAsync("kr", true),
+                LoadRegionsAsync("jp", false),
+                LoadRegionsAsync("jp", true),
+                LoadRegionsAsync("hk", false),
+                LoadRegionsAsync("hk", true),
+                LoadRegionsAsync("sg", false),
+                LoadRegionsAsync("sg", true),
+            };
 
-            Region JapanRegion = new("JP");
-            JapanRegion.Nodes.Add(new(IPAddress.Parse("43.163.252.167"), 20000));
-            RegionViewModel JapanVM = new(JapanRegion);
-            Regions.Add(JapanVM);
+            await Task.WhenAll(tasks);
+        }
 
-            Region SingaporeRegion = new("SG");
-            SingaporeRegion.Nodes.Add(new(IPAddress.Parse("43.134.150.4"), 20000));
-            RegionViewModel SingaporeVM = new(SingaporeRegion);
-            Regions.Add(SingaporeVM);
+        private async Task LoadRegionsAsync(string regionCode, bool isEdgeOne)
+        {
+            var endpoint = new IPEndPoint(IPAddress.Parse("1.1.1.1"), 53);
+            var client = new LookupClient(endpoint);
+            string edge = isEdgeOne ? "eo" : "server";
+            int edgeOneIndex = 1;
+            int serverIndex = 30;
 
-            Region HongKongRegion = new("HK");
-            HongKongRegion.Nodes.Add(new(IPAddress.Parse("43.132.138.189"), 20000));
-            HongKongRegion.Nodes.Add(new(IPAddress.Parse("43.175.252.41"), 20000));
-            HongKongRegion.Nodes.Add(new(IPAddress.Parse("43.175.253.41"), 20000));
-            RegionViewModel HongKongVM = new(HongKongRegion);
-            Regions.Add(HongKongVM);
+            Region region = new($"{regionCode}-{(isEdgeOne ? "eo" : "server")}");
 
-            Region Sangpaolo = new("BR");
-            Sangpaolo.Nodes.Add(new(IPAddress.Parse("43.175.253.234"), 20000));
-            RegionViewModel SangpaoloVM = new(Sangpaolo);
-            Regions.Add(SangpaoloVM);
+            for (int i = 1; i <= (isEdgeOne ? edgeOneIndex : serverIndex); i++)
+            {
+                var result = client.Query($"klbq-prod-ds-{regionCode}{i}-{edge}.strinova.com", QueryType.A);
+                var response = result.Answers.ARecords();
+                foreach (var record in response)
+                {
+                    var ip = record.Address;
+                    var port = 20000;
+                    Debug.WriteLine($"{regionCode}:{i}번째 서버: {ip}");
+                    region.Nodes.Add(new(ip, port));
+                    //App.Current.Dispatcher.Invoke(() => region.Nodes.Add(new(ip, port)));
+                }
+            }
+            //Regions.Add(new RegionViewModel(region));
+            // IDK why should I use App.Current.Dispatcher.Invoke() here
+            App.Current.Dispatcher.Invoke(() => Regions.Add(new RegionViewModel(region)));
         }
     }
 }
