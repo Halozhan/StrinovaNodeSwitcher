@@ -23,28 +23,28 @@ namespace WpfApp.ViewModels
         {
             var tasks = new[]
             {
-                Task.Run(() => LoadNodesAsync("kr")),
-                Task.Run(() => LoadNodesAsync("jp")),
-                Task.Run(() => LoadNodesAsync("hk")),
-                Task.Run(() => LoadNodesAsync("sg")),
-                Task.Run(() => LoadNodesAsync("de")),
-                Task.Run(() => LoadNodesAsync("mex")),
-                Task.Run(() => LoadNodesAsync("chi")),
-                Task.Run(() => LoadNodesAsync("usw")),
-                Task.Run(() => LoadNodesAsync("use")),
-                Task.Run(() => LoadNodesAsync("mia")),
-                Task.Run(() => LoadNodesAsync("sao")),
+                Task.Run(() => LoadNodesAsync("Seoul, Korea (the Republic of)", "kr")),
+                Task.Run(() => LoadNodesAsync("Tokyo, Japan", "jp")),
+                Task.Run(() => LoadNodesAsync("Hong Kong, Hong Kong", "hk")),
+                Task.Run(() => LoadNodesAsync("Singapore, Singapore", "sg")),
+                Task.Run(() => LoadNodesAsync("Frankfurt am Main, Germany", "de")),
+                Task.Run(() => LoadNodesAsync("Queretaro, Mexico", "mex")),
+                Task.Run(() => LoadNodesAsync("Chicago, United States", "chi")),
+                Task.Run(() => LoadNodesAsync("California, United States", "usw")),
+                Task.Run(() => LoadNodesAsync("Virginia, United States","use")),
+                Task.Run(() => LoadNodesAsync("Miami, United States", "mia")),
+                Task.Run(() => LoadNodesAsync("Sao Paulo, Brazil", "sao")),
             };
 
             await Task.WhenAll(tasks);
         }
 
-        private void LoadNodesAsync(string regionCode)
+        private void LoadNodesAsync(string regionName, string regionCode)
         {
             var endpoint = new IPEndPoint(IPAddress.Parse("1.1.1.1"), 53);
             var client = new LookupClient(endpoint);
 
-            Region servers = new($"{regionCode.ToUpper()}-Server");
+            Region servers = new($"{regionName} Server");
             for (int i = 1; i <= 150; i++)
             {
                 var serverResult = client.Query($"klbq-prod-ds-{regionCode}{i}-server.strinova.com", QueryType.A);
@@ -53,20 +53,20 @@ namespace WpfApp.ViewModels
                 {
                     var ip = record.Address;
                     var port = 20000;
-                    Debug.WriteLine($"{regionCode}:{i}번째 Server: {ip}");
+                    Debug.WriteLine($"{regionName}.{regionCode}:{i}번째 Server: {ip}");
                     servers.Nodes.Add(new(ip, port));
                 }
             }
 
 
-            Region edgeOne = new($"{regionCode.ToUpper()}-EdgeOne(Accelerator)");
+            Region edgeOne = new($"{regionName} EdgeOne(Accelerator)");
             var edgeOneResult = client.Query($"klbq-prod-ds-{regionCode}1-eo.strinova.com", QueryType.A);
             var edgeOneResponse = edgeOneResult.Answers.ARecords();
             foreach (var record in edgeOneResponse)
             {
                 var ip = record.Address;
                 var port = 20000;
-                Debug.WriteLine($"{regionCode}:EdgeOne Accelerator: {ip}");
+                Debug.WriteLine($"{regionName}.{regionCode}:EdgeOne Accelerator: {ip}");
                 edgeOne.Nodes.Add(new(ip, port));
             }
 
