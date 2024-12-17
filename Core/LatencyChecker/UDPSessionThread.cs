@@ -1,27 +1,37 @@
 ﻿using System.Diagnostics;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 
 namespace Core.LatencyChecker
 {
-    public class UDPSessionThread(UDPSession session)
+    public class UDPSessionThread
     {
-        private readonly UDPSession _session = session;
-        private CancellationTokenSource? _cancellationTokenSource;
+        private readonly UDPSession _session;
+        private readonly CancellationTokenSource _cancellationTokenSource;
+        private Thread _thread;
+
+        public UDPSessionThread(UDPSession session, Action<float> latencyAppend, Action notifyEvent)
+        {
+            _session = session;
+            _cancellationTokenSource = new CancellationTokenSource();
+            _thread = new Thread(() => Run(_cancellationTokenSource.Token, latencyAppend, notifyEvent))
+            {
+                IsBackground = true
+            };
+        }
 
         public void Start()
         {
-            _cancellationTokenSource = new CancellationTokenSource();
+            _thread.Start();
         }
 
         public void Stop()
         {
-            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource.Cancel();
         }
 
-        public async IAsyncEnumerable<float> Run([EnumeratorCancellation] CancellationToken token)
+        // 취소 토큰과 삽입할 데이터의 콜백 함수를 받아서 실행
+        private void Run(CancellationToken token, Action<float> latencyAppend, Action notifyEvent)
         {
             Stopwatch stopwatch = new();
 
@@ -49,29 +59,30 @@ namespace Core.LatencyChecker
                             stopwatch.Start();
 
                             // Receive data
-                            byte[] receiveBytes = await UDPSession.ReceiveDataAsync(udpClient);
+                            byte[] receiveBytes = _session.ReceiveData(udpClient);
                             stopwatch.Stop();
 
                             // 보낸 패킷과 받은 패킷이 같은지 확인
                             if (Encoding.ASCII.GetString(_session.sendBytes) != Encoding.ASCII.GetString(receiveBytes))
                             {
                                 // Wrong packet received
-                                result = -1;
                                 lossCountDuringSession++;
+                                latencyAppend(-1);
+                                notifyEvent();
                                 continue;
                             }
 
                             // 핑이 1000ms 초과하면
-                            else if (stopwatch.ElapsedMilliseconds > 1000)
+                            if (stopwatch.ElapsedMilliseconds > 1000)
                             {
-                                result = -1;
                                 lossCountDuringSession++;
+                                latencyAppend(-1);
+                                notifyEvent();
+                                continue;
                             }
                             // Add latency to the list
-                            else
-                            {
-                                result = stopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000;
-                            }
+                            latencyAppend(stopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000);
+                            notifyEvent();
 
                         }
                         catch (Exception ex)
@@ -80,13 +91,11 @@ namespace Core.LatencyChecker
                             lossCountDuringSession++;
                         }
 
-                        yield return result;
-
                         // Calculate delay
                         long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
                         if (elapsedMilliseconds < 200)
                         {
-                            await Task.Delay(200 - (int)elapsedMilliseconds, token);
+                            Task.Delay(200 - (int)elapsedMilliseconds, token);
                         }
                     }
                 }

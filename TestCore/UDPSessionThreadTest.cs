@@ -14,20 +14,15 @@ namespace TestCore
             List<float> latency = [];
 
             UDPSession session = new(address, port);
-            UDPSessionThread thread = new(session);
+            UDPSessionThread thread = new(session, latency.Add, () => { });
 
             // Start the thread
             thread.Start();
 
             // Collect data for 100 pings
-            var token = new CancellationTokenSource();
-            await foreach (var ping in thread.Run(token.Token))
+            while (latency.Count < 100)
             {
-                latency.Add(ping);
-                if (latency.Count >= 100)
-                {
-                    break;
-                }
+                await Task.Delay(20);
             }
 
             // Stop the thread

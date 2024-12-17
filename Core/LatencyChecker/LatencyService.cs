@@ -2,14 +2,14 @@
 {
     public class LatencyService(Latency latency)
     {
-        private readonly List<float> LatencyList = latency.GetLatencyList();
+        private readonly Latency _latency = latency;
 
         // 이상치 제거
         private List<float> RemoveOutlier()
         {
-            if (LatencyList.Count == 0) return [];
+            if (_latency.Count == 0) return [];
             // 0 미만이거나 1000 초과인 값 제거
-            return LatencyList.Where(ping => ping >= 0 && ping <= 1000).ToList();
+            return _latency.GetLatencyList().Where(ping => ping >= 0 && ping <= 1000).ToList();
         }
 
         public float GetAverage()
@@ -35,20 +35,21 @@
 
         public float GetLossRate()
         {
-            if (LatencyList.Count == 0) return -1;
-            return (float)LatencyList.Count(ping => ping == -1) / LatencyList.Count;
+            var list = _latency.GetLatencyList();
+            if (list.Count == 0) return -1;
+            return (float)list.Count(ping => ping == -1) / list.Count;
         }
 
         public float GetStandardDeviation()
         {
             var list = RemoveOutlier();
             if (list.Count == 0) return -1;
-            return (float)Math.Sqrt(LatencyList.Average(ping => Math.Pow(ping - GetAverage(), 2)));
+            return (float)Math.Sqrt(list.Average(ping => Math.Pow(ping - GetAverage(), 2)));
         }
 
         public float GetScore()
         {
-            if (LatencyList.Count == 0) return -1;
+            if (_latency.Count == 0) return -1;
             return (float)((GetAverage() + GetStandardDeviation()) * Math.Pow(50, 0.01 * GetLossRate()));
         }
     }

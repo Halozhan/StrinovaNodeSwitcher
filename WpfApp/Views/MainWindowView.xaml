@@ -25,13 +25,13 @@
                             <ListView ItemsSource="{Binding Nodes}">
                                 <ListView.View>
                                     <GridView>
-                                        <GridViewColumn Header="Address" DisplayMemberBinding="{Binding Address}"/>
-                                        <GridViewColumn Header="Score" DisplayMemberBinding="{Binding Score, StringFormat=N2}"/>
-                                        <GridViewColumn Header="Average" DisplayMemberBinding="{Binding Average, StringFormat=N2}"/>
-                                        <GridViewColumn Header="Loss Rate" DisplayMemberBinding="{Binding LossRate, StringFormat={}{0:P2}}"/>
-                                        <GridViewColumn Header="Minimum" DisplayMemberBinding="{Binding Min, StringFormat=N2}"/>
-                                        <GridViewColumn Header="Maximum" DisplayMemberBinding="{Binding Max, StringFormat=N2}"/>
-                                        <GridViewColumn Header="StandardDeviation" DisplayMemberBinding="{Binding StandardDeviation, StringFormat=N2}"/>
+                                        <GridViewColumn Header="Address" DisplayMemberBinding="{Binding Address}" Width="100"/>
+                                        <GridViewColumn Header="Score" DisplayMemberBinding="{Binding Score, StringFormat=N2}" Width="60"/>
+                                        <GridViewColumn Header="Avg" DisplayMemberBinding="{Binding Average, StringFormat=N2}" Width="60"/>
+                                        <GridViewColumn Header="LossRate" DisplayMemberBinding="{Binding LossRate, StringFormat={}{0:P2}}" Width="60"/>
+                                        <GridViewColumn Header="Min" DisplayMemberBinding="{Binding Min, StringFormat=N2}" Width="60"/>
+                                        <GridViewColumn Header="Max" DisplayMemberBinding="{Binding Max, StringFormat=N2}" Width="60"/>
+                                        <GridViewColumn Header="Stdev" DisplayMemberBinding="{Binding StandardDeviation, StringFormat=N2}" Width="60"/>
                                     </GridView>
                                 </ListView.View>
                             </ListView>

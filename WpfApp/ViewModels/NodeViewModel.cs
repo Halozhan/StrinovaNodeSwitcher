@@ -2,7 +2,6 @@
 using Core.LatencyChecker;
 using Core.Node;
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace WpfApp.ViewModels
 {
@@ -16,7 +15,6 @@ namespace WpfApp.ViewModels
         private LatencyService _latencyService;
 
         private readonly UDPSessionThread _udpSessionThread;
-        private CancellationTokenSource _cancellationTokenSource;
 
         public NodeViewModel(Node node)
         {
@@ -24,8 +22,18 @@ namespace WpfApp.ViewModels
             LatencyService = new LatencyService(Node.Latency);
 
             UDPSession session = new(Node.IPAddress, Node.Port);
-            _udpSessionThread = new UDPSessionThread(session);
-            StartSessionAsync();
+            _udpSessionThread = new UDPSessionThread(session, Node.Latency.Add, Latency_CollectionChanged);
+            StartSession();
+        }
+
+        private void Latency_CollectionChanged()
+        {
+            OnPropertyChanged(nameof(Average));
+            OnPropertyChanged(nameof(Min));
+            OnPropertyChanged(nameof(Max));
+            OnPropertyChanged(nameof(LossRate));
+            OnPropertyChanged(nameof(StandardDeviation));
+            OnPropertyChanged(nameof(Score));
         }
 
         public string Address
@@ -33,41 +41,13 @@ namespace WpfApp.ViewModels
             get => Node.IPAddress.ToString();
         }
 
-        public async Task StartSessionAsync()
+        public void StartSession()
         {
             _udpSessionThread.Start();
-            _cancellationTokenSource = new CancellationTokenSource();
-            try
-            {
-                await foreach (var ping in _udpSessionThread.Run(_cancellationTokenSource.Token))
-                {
-                    Node.Latency.Add(ping);
-                    OnPropertyChanged(nameof(Average));
-                    OnPropertyChanged(nameof(Min));
-                    OnPropertyChanged(nameof(Max));
-                    OnPropertyChanged(nameof(LossRate));
-                    OnPropertyChanged(nameof(StandardDeviation));
-                    OnPropertyChanged(nameof(Score));
-                }
-            }
-            catch (TaskCanceledException)
-            {
-                // Task is cancelled
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-            finally
-            {
-                _udpSessionThread.Stop();
-                Debug.WriteLine("스레드가 종료됨");
-            }
         }
 
         public void StopSession()
         {
-            _cancellationTokenSource.Cancel();
             _udpSessionThread.Stop();
         }
 

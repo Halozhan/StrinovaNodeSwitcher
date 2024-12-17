@@ -47,7 +47,7 @@
             _lock.EnterReadLock();
             try
             {
-                return _latencyList;
+                return new List<float>(_latencyList); // Copy
             }
             finally
             {
