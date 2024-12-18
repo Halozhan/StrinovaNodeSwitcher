@@ -1,6 +1,6 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
+using WpfApp.ViewModels;
+using WpfApp.Views;
 
 namespace WpfApp
 {
@@ -9,6 +9,15 @@ namespace WpfApp
     /// </summary>
     public partial class App : Application
     {
-    }
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            MainWindow = new MainWindowView()
+            {
+                //DataContext = new MainWindowViewModel()
+            };
+            MainWindow.Show();
 
+            base.OnStartup(e);
+        }
+    }
 }

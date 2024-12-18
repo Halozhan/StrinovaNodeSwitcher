@@ -7,7 +7,7 @@
         // 이상치 제거
         private List<float> RemoveOutlier()
         {
-            if (_latency.Count == 0) return [];
+            if (_latency.GetLatencyList().IsEmpty) return [];
             // 0 미만이거나 1000 초과인 값 제거
             return _latency.GetLatencyList().Where(ping => ping >= 0 && ping <= 1000).ToList();
         }
@@ -49,7 +49,7 @@
 
         public float GetScore()
         {
-            if (_latency.Count == 0) return -1;
+            if (_latency.GetLatencyList().Count == 0) return -1;
             return (float)((GetAverage() + GetStandardDeviation()) * Math.Pow(50, 0.01 * GetLossRate()));
         }
     }

@@ -1,8 +1,21 @@
-﻿namespace Core.Region
+﻿using System.Collections.ObjectModel;
+
+namespace Core.Region
 {
-    public class Region(string name)
+    public class Region
     {
-        public string Name { get; set; } = name;
-        public readonly List<Node.Node> Nodes = [];
+        public string Name { get; private set; }
+        public ObservableCollection<Node.Node> Nodes { get; private set; }
+
+        public Region(string name)
+        {
+            Name = name;
+            Nodes = [];
+        }
+
+        public void Add(Node.Node node)
+        {
+            Nodes.Add(node);
+        }
     }
 }

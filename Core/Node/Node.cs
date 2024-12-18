@@ -1,5 +1,4 @@
-﻿using Core.LatencyChecker;
-using System.Net;
+﻿using System.Net;
 
 namespace Core.Node
 {
@@ -7,6 +6,5 @@ namespace Core.Node
     {
         public IPAddress? IPAddress { get; set; } = address;
         public int Port { get; set; } = port;
-        public Latency Latency { get; set; } = new Latency();
     }
 }

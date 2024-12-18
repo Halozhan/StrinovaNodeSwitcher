@@ -2,10 +2,10 @@
 
 namespace TestCore
 {
-    public class UDPSessionThreadTest
+    public class UDPSessionTest
     {
         [Fact]
-        public async void ThreadTest()
+        public async void SessionTest()
         {
             // Strinova South Korea Edge-One Global Accelerator IP
             var address = System.Net.IPAddress.Parse("43.155.193.230");
@@ -13,8 +13,7 @@ namespace TestCore
 
             List<float> latency = [];
 
-            UDPSession session = new(address, port);
-            UDPSessionThread thread = new(session, latency.Add, () => { });
+            UDPSession thread = new(address, port, latency.Add, () => { });
 
             // Start the thread
             thread.Start();

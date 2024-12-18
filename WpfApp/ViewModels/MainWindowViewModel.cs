@@ -7,8 +7,7 @@ using System.Net;
 
 namespace WpfApp.ViewModels
 {
-    [ObservableObject]
-    public partial class MainWindowViewModel
+    public partial class MainWindowViewModel : ObservableObject
     {
         [ObservableProperty]
         private ObservableCollection<RegionViewModel> _regions;
@@ -23,51 +22,64 @@ namespace WpfApp.ViewModels
         {
             var tasks = new[]
             {
-                Task.Run(() => LoadNodesAsync("Seoul, Korea (the Republic of)", "kr")),
-                Task.Run(() => LoadNodesAsync("Tokyo, Japan", "jp")),
-                Task.Run(() => LoadNodesAsync("Hong Kong, Hong Kong", "hk")),
-                Task.Run(() => LoadNodesAsync("Singapore, Singapore", "sg")),
-                Task.Run(() => LoadNodesAsync("Frankfurt am Main, Germany", "de")),
-                Task.Run(() => LoadNodesAsync("Queretaro, Mexico", "mex")),
-                Task.Run(() => LoadNodesAsync("Chicago, United States", "chi")),
-                Task.Run(() => LoadNodesAsync("California, United States", "usw")),
-                Task.Run(() => LoadNodesAsync("Virginia, United States","use")),
-                Task.Run(() => LoadNodesAsync("Miami, United States", "mia")),
-                Task.Run(() => LoadNodesAsync("Sao Paulo, Brazil", "sao")),
+                LoadNodesAsync("Seoul, Korea (the Republic of)", "kr"),
+                LoadNodesAsync("Tokyo, Japan", "jp"),
+                LoadNodesAsync("Hong Kong, Hong Kong", "hk"),
+                LoadNodesAsync("Singapore, Singapore", "sg"),
+                LoadNodesAsync("Frankfurt am Main, Germany", "de"),
+                LoadNodesAsync("Queretaro, Mexico", "mex"),
+                LoadNodesAsync("Chicago, United States", "chi"),
+                LoadNodesAsync("California, United States", "usw"),
+                LoadNodesAsync("Virginia, United States","use"),
+                LoadNodesAsync("Miami, United States", "mia"),
+                LoadNodesAsync("Sao Paulo, Brazil", "sao"),
             };
 
             await Task.WhenAll(tasks);
         }
 
-        private void LoadNodesAsync(string regionName, string regionCode)
+        private async Task LoadNodesAsync(string regionName, string regionCode)
         {
             var endpoint = new IPEndPoint(IPAddress.Parse("1.1.1.1"), 53);
             var client = new LookupClient(endpoint);
 
+            // Region을 정의해주고 RegionViewModel에 추가
             Region servers = new($"{regionName} Server");
             for (int i = 1; i <= 150; i++)
             {
-                var serverResult = client.Query($"klbq-prod-ds-{regionCode}{i}-server.strinova.com", QueryType.A);
+                var serverResult = await client.QueryAsync($"klbq-prod-ds-{regionCode}{i}-server.strinova.com", QueryType.A);
                 var serverResponse = serverResult.Answers.ARecords();
+                if (serverResponse.Count() == 0)
+                {
+                    break;
+                }
                 foreach (var record in serverResponse)
                 {
                     var ip = record.Address;
                     var port = 20000;
                     Debug.WriteLine($"{regionName}.{regionCode}:{i}번째 Server: {ip}");
-                    servers.Nodes.Add(new(ip, port));
+                    servers.Add(new(ip, port));
+                    //App.Current.Dispatcher.Invoke(() =>
+                    //{
+                    //    servers.Add(new(ip, port));
+                    //});
                 }
             }
 
 
             Region edgeOne = new($"{regionName} EdgeOne(Accelerator)");
-            var edgeOneResult = client.Query($"klbq-prod-ds-{regionCode}1-eo.strinova.com", QueryType.A);
+            var edgeOneResult = await client.QueryAsync($"klbq-prod-ds-{regionCode}1-eo.strinova.com", QueryType.A);
             var edgeOneResponse = edgeOneResult.Answers.ARecords();
             foreach (var record in edgeOneResponse)
             {
                 var ip = record.Address;
                 var port = 20000;
                 Debug.WriteLine($"{regionName}.{regionCode}:EdgeOne Accelerator: {ip}");
-                edgeOne.Nodes.Add(new(ip, port));
+                edgeOne.Add(new(ip, port));
+                //App.Current.Dispatcher.Invoke(() =>
+                //{
+                //    edgeOne.Add(new(ip, port));
+                //});
             }
 
             //Regions.Add(new RegionViewModel(region));

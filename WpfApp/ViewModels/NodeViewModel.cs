@@ -5,24 +5,29 @@ using System.ComponentModel;
 
 namespace WpfApp.ViewModels
 {
-    [INotifyPropertyChanged]
-    public partial class NodeViewModel
+    public partial class NodeViewModel : ObservableObject
     {
         [ObservableProperty]
         private Node _node;
 
+        public string IPAddress => Node.IPAddress.ToString();
+        public int Port => Node.Port;
+
+        public LatencyViewModel Latency { get; set; }
+
         [ObservableProperty]
         private LatencyService _latencyService;
 
-        private readonly UDPSessionThread _udpSessionThread;
+        private readonly UDPSession _udpSession;
 
         public NodeViewModel(Node node)
         {
             Node = node;
-            LatencyService = new LatencyService(Node.Latency);
+            Latency latency = new();
+            Latency = new LatencyViewModel(latency);
+            LatencyService = new LatencyService(latency);
 
-            UDPSession session = new(Node.IPAddress, Node.Port);
-            _udpSessionThread = new UDPSessionThread(session, Node.Latency.Add, Latency_CollectionChanged);
+            _udpSession = new UDPSession(Node.IPAddress, Node.Port, Latency.Add, Latency_CollectionChanged);
             StartSession();
         }
 
@@ -36,49 +41,23 @@ namespace WpfApp.ViewModels
             OnPropertyChanged(nameof(Score));
         }
 
-        public string Address
-        {
-            get => Node.IPAddress.ToString();
-        }
-
         public void StartSession()
         {
-            _udpSessionThread.Start();
+            _udpSession.Start();
         }
 
         public void StopSession()
         {
-            _udpSessionThread.Stop();
+            _udpSession.Stop();
         }
 
-        public float Average
-        {
-            get => LatencyService.GetAverage();
-        }
+        public string Address => Node.IPAddress.ToString();
 
-        public float Min
-        {
-            get => LatencyService.GetMin();
-        }
-
-        public float Max
-        {
-            get => LatencyService.GetMax();
-        }
-
-        public float LossRate
-        {
-            get => LatencyService.GetLossRate();
-        }
-
-        public float StandardDeviation
-        {
-            get => LatencyService.GetStandardDeviation();
-        }
-
-        public float Score
-        {
-            get => LatencyService.GetScore();
-        }
+        public float Average => LatencyService.GetAverage();
+        public float Min => LatencyService.GetMin();
+        public float Max => LatencyService.GetMax();
+        public float LossRate => LatencyService.GetLossRate();
+        public float StandardDeviation => LatencyService.GetStandardDeviation();
+        public float Score => LatencyService.GetScore();
     }
 }

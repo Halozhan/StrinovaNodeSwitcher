@@ -1,74 +1,35 @@
-﻿namespace Core.LatencyChecker
+﻿using System.Collections.Concurrent;
+
+namespace Core.LatencyChecker
 {
     public class Latency
     {
         private const int MaxCapacity = 1000;
-        private readonly List<float> _latencyList;
-        private readonly ReaderWriterLockSlim _lock;
+        private readonly ConcurrentQueue<float> _latencies;
 
         public Latency()
         {
-            _latencyList = new List<float>();
-            _lock = new ReaderWriterLockSlim();
+            _latencies = [];
         }
 
         public void Add(float ping)
         {
-            _lock.EnterWriteLock();
-            try
+            _latencies.Enqueue(ping);
+            while (_latencies.Count > MaxCapacity)
             {
-                _latencyList.Add(ping);
-                while (_latencyList.Count > MaxCapacity)
-                {
-                    _latencyList.RemoveAt(0);
-                }
-            }
-            finally
-            {
-                _lock.ExitWriteLock();
+                // 맨 앞의 요소 제거
+                _latencies.TryDequeue(out _);
             }
         }
 
         public void Clear()
         {
-            _lock.EnterWriteLock();
-            try
-            {
-                _latencyList.Clear();
-            }
-            finally
-            {
-                _lock.ExitWriteLock();
-            }
+            while (_latencies.TryDequeue(out _)) { }
         }
 
-        public List<float> GetLatencyList()
+        public ConcurrentQueue<float> GetLatencyList()
         {
-            _lock.EnterReadLock();
-            try
-            {
-                return new List<float>(_latencyList); // Copy
-            }
-            finally
-            {
-                _lock.ExitReadLock();
-            }
-        }
-
-        public int Count
-        {
-            get
-            {
-                _lock.EnterReadLock();
-                try
-                {
-                    return _latencyList.Count;
-                }
-                finally
-                {
-                    _lock.ExitReadLock();
-                }
-            }
+            return _latencies;
         }
     }
 }

@@ -1,28 +1,30 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Core.Node;
 using Core.Region;
+using System.Collections.ObjectModel;
 
 namespace WpfApp.ViewModels
 {
-    [INotifyPropertyChanged]
-    public partial class RegionViewModel
+    public partial class RegionViewModel : ObservableObject
     {
-        [ObservableProperty]
-        private Region _region;
+        //private readonly Region _region;
+        public string Name { get; set; }
+        public ObservableCollection<NodeViewModel> Nodes { get; set; }
 
         public RegionViewModel(Region region)
         {
-            Region = region;
+            Name = region.Name;
+            Nodes = [];
+
+            foreach (var node in region.Nodes)
+            {
+                Nodes.Add(new NodeViewModel(node));
+            }
         }
 
-        public string Name
+        public void Add(Node node)
         {
-            get => Region.Name;
-            set => SetProperty(Region.Name, value, Region, (region, name) => region.Name = name);
-        }
-
-        public List<NodeViewModel> Nodes
-        {
-            get => Region.Nodes.Select(node => new NodeViewModel(node)).ToList();
+            Nodes.Add(new NodeViewModel(node));
         }
     }
 }
