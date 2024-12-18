@@ -9,12 +9,12 @@ namespace WpfApp.ViewModels
 {
     public partial class MainWindowViewModel : ObservableObject
     {
-        [ObservableProperty]
-        private ObservableCollection<RegionViewModel> _regions;
+        private readonly ObservableCollection<RegionViewModel> _regions;
+        public IEnumerable<RegionViewModel> Regions => _regions;
 
         public MainWindowViewModel()
         {
-            Regions = [];
+            _regions = [];
             Task.Run(() => LoadRegionsAsync());
         }
 
@@ -23,16 +23,16 @@ namespace WpfApp.ViewModels
             var tasks = new[]
             {
                 LoadNodesAsync("Seoul, Korea (the Republic of)", "kr"),
-                LoadNodesAsync("Tokyo, Japan", "jp"),
-                LoadNodesAsync("Hong Kong, Hong Kong", "hk"),
-                LoadNodesAsync("Singapore, Singapore", "sg"),
-                LoadNodesAsync("Frankfurt am Main, Germany", "de"),
-                LoadNodesAsync("Queretaro, Mexico", "mex"),
-                LoadNodesAsync("Chicago, United States", "chi"),
-                LoadNodesAsync("California, United States", "usw"),
-                LoadNodesAsync("Virginia, United States","use"),
-                LoadNodesAsync("Miami, United States", "mia"),
-                LoadNodesAsync("Sao Paulo, Brazil", "sao"),
+                //LoadNodesAsync("Tokyo, Japan", "jp"),
+                //LoadNodesAsync("Hong Kong, Hong Kong", "hk"),
+                //LoadNodesAsync("Singapore, Singapore", "sg"),
+                //LoadNodesAsync("Frankfurt am Main, Germany", "de"),
+                //LoadNodesAsync("Queretaro, Mexico", "mex"),
+                //LoadNodesAsync("Chicago, United States", "chi"),
+                //LoadNodesAsync("California, United States", "usw"),
+                //LoadNodesAsync("Virginia, United States","use"),
+                //LoadNodesAsync("Miami, United States", "mia"),
+                //LoadNodesAsync("Sao Paulo, Brazil", "sao"),
             };
 
             await Task.WhenAll(tasks);
@@ -45,6 +45,17 @@ namespace WpfApp.ViewModels
 
             // Region을 정의해주고 RegionViewModel에 추가
             Region servers = new($"{regionName} Server");
+            Region edgeOne = new($"{regionName} EdgeOne(Accelerator)");
+            RegionViewModel serverRegionViewModel = new(servers);
+            RegionViewModel edgeOneRegionViewModel = new(edgeOne);
+
+            // UI 스레드에서 Regions 컬렉션을 업데이트
+            await App.Current.Dispatcher.InvokeAsync(() =>
+            {
+                _regions.Add(serverRegionViewModel);
+                _regions.Add(edgeOneRegionViewModel);
+            });
+
             for (int i = 1; i <= 150; i++)
             {
                 var serverResult = await client.QueryAsync($"klbq-prod-ds-{regionCode}{i}-server.strinova.com", QueryType.A);
@@ -58,16 +69,13 @@ namespace WpfApp.ViewModels
                     var ip = record.Address;
                     var port = 20000;
                     Debug.WriteLine($"{regionName}.{regionCode}:{i}번째 Server: {ip}");
-                    servers.Add(new(ip, port));
-                    //App.Current.Dispatcher.Invoke(() =>
-                    //{
-                    //    servers.Add(new(ip, port));
-                    //});
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        serverRegionViewModel.Add(new(ip, port));
+                    });
                 }
             }
 
-
-            Region edgeOne = new($"{regionName} EdgeOne(Accelerator)");
             var edgeOneResult = await client.QueryAsync($"klbq-prod-ds-{regionCode}1-eo.strinova.com", QueryType.A);
             var edgeOneResponse = edgeOneResult.Answers.ARecords();
             foreach (var record in edgeOneResponse)
@@ -75,20 +83,11 @@ namespace WpfApp.ViewModels
                 var ip = record.Address;
                 var port = 20000;
                 Debug.WriteLine($"{regionName}.{regionCode}:EdgeOne Accelerator: {ip}");
-                edgeOne.Add(new(ip, port));
-                //App.Current.Dispatcher.Invoke(() =>
-                //{
-                //    edgeOne.Add(new(ip, port));
-                //});
+                App.Current.Dispatcher.Invoke(() =>
+                {
+                    edgeOneRegionViewModel.Add(new(ip, port));
+                });
             }
-
-            //Regions.Add(new RegionViewModel(region));
-            // IDK why should I use App.Current.Dispatcher.Invoke() here
-            App.Current.Dispatcher.Invoke(() =>
-            {
-                Regions.Add(new RegionViewModel(servers));
-                Regions.Add(new RegionViewModel(edgeOne));
-            });
         }
     }
 }
