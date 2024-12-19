@@ -23,9 +23,9 @@ namespace WpfApp.ViewModels
             var tasks = new[]
             {
                 LoadNodesAsync("Seoul, Korea (the Republic of)", "kr"),
-                //LoadNodesAsync("Tokyo, Japan", "jp"),
-                //LoadNodesAsync("Hong Kong, Hong Kong", "hk"),
-                //LoadNodesAsync("Singapore, Singapore", "sg"),
+                LoadNodesAsync("Tokyo, Japan", "jp"),
+                LoadNodesAsync("Hong Kong, Hong Kong", "hk"),
+                LoadNodesAsync("Singapore, Singapore", "sg"),
                 //LoadNodesAsync("Frankfurt am Main, Germany", "de"),
                 //LoadNodesAsync("Queretaro, Mexico", "mex"),
                 //LoadNodesAsync("Chicago, United States", "chi"),
@@ -43,11 +43,8 @@ namespace WpfApp.ViewModels
             var endpoint = new IPEndPoint(IPAddress.Parse("1.1.1.1"), 53);
             var client = new LookupClient(endpoint);
 
-            // Region을 정의해주고 RegionViewModel에 추가
-            Region servers = new($"{regionName} Server");
-            Region edgeOne = new($"{regionName} EdgeOne(Accelerator)");
-            RegionViewModel serverRegionViewModel = new(servers);
-            RegionViewModel edgeOneRegionViewModel = new(edgeOne);
+            RegionViewModel serverRegionViewModel = new($"{regionName} Server");
+            RegionViewModel edgeOneRegionViewModel = new($"{regionName} EdgeOne(Accelerator)");
 
             // UI 스레드에서 Regions 컬렉션을 업데이트
             await App.Current.Dispatcher.InvokeAsync(() =>
@@ -69,10 +66,7 @@ namespace WpfApp.ViewModels
                     var ip = record.Address;
                     var port = 20000;
                     Debug.WriteLine($"{regionName}.{regionCode}:{i}번째 Server: {ip}");
-                    App.Current.Dispatcher.Invoke(() =>
-                    {
-                        serverRegionViewModel.Add(new(ip, port));
-                    });
+                    serverRegionViewModel.Add(new(ip, port));
                 }
             }
 
@@ -83,10 +77,7 @@ namespace WpfApp.ViewModels
                 var ip = record.Address;
                 var port = 20000;
                 Debug.WriteLine($"{regionName}.{regionCode}:EdgeOne Accelerator: {ip}");
-                App.Current.Dispatcher.Invoke(() =>
-                {
-                    edgeOneRegionViewModel.Add(new(ip, port));
-                });
+                edgeOneRegionViewModel.Add(new(ip, port));
             }
         }
     }

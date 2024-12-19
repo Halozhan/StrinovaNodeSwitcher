@@ -7,26 +7,27 @@ namespace TestCore
         [Fact]
         public async void SessionTest()
         {
-            // Strinova South Korea Edge-One Global Accelerator IP
+            // Strinova server
             var address = System.Net.IPAddress.Parse("43.155.193.230");
             var port = 20000;
 
             List<float> latency = [];
 
-            UDPSession thread = new(address, port, latency.Add, () => { });
+            async Task LatencyAppend(float value)
+            {
+                latency.Add(value);
+                await Task.CompletedTask;
+            }
+
+            UDPSession thread = new(address, port, LatencyAppend);
 
             // Start the thread
             thread.Start();
 
-            // Collect data for 100 pings
-            while (latency.Count < 100)
-            {
-                await Task.Delay(20);
-            }
+            await Task.Delay(5000);
 
             // Stop the thread
             thread.Stop();
-
 
             Assert.True(latency.Average() > 0);
             Assert.True(latency.Average() < 1000);

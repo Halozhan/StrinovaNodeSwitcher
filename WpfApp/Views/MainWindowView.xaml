@@ -25,13 +25,14 @@
                             <ListView ItemsSource="{Binding Nodes}">
                                 <ListView.View>
                                     <GridView>
+                                        <GridViewColumn Header="No." DisplayMemberBinding="{Binding Number}" Width="40"/>
                                         <GridViewColumn Header="Address" DisplayMemberBinding="{Binding Address}" Width="100"/>
-                                        <GridViewColumn Header="Score" DisplayMemberBinding="{Binding Score, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="Avg" DisplayMemberBinding="{Binding Average, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="LossRate" DisplayMemberBinding="{Binding LossRate, StringFormat={}{0:P2}}" Width="60"/>
-                                        <GridViewColumn Header="Min" DisplayMemberBinding="{Binding Min, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="Max" DisplayMemberBinding="{Binding Max, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="Stdev" DisplayMemberBinding="{Binding StandardDeviation, StringFormat=N2}" Width="60"/>
+                                        <GridViewColumn Header="Score" DisplayMemberBinding="{Binding Latency.Score, StringFormat=N2}" Width="60"/>
+                                        <GridViewColumn Header="Avg" DisplayMemberBinding="{Binding Latency.Average, StringFormat=N2}" Width="60"/>
+                                        <GridViewColumn Header="LossRate" DisplayMemberBinding="{Binding Latency.LossRate, StringFormat={}{0:P2}}" Width="60"/>
+                                        <GridViewColumn Header="Min" DisplayMemberBinding="{Binding Latency.Min, StringFormat=N2}" Width="60"/>
+                                        <GridViewColumn Header="Max" DisplayMemberBinding="{Binding Latency.Max, StringFormat=N2}" Width="60"/>
+                                        <GridViewColumn Header="Stdev" DisplayMemberBinding="{Binding Latency.StandardDeviation, StringFormat=N2}" Width="60"/>
                                     </GridView>
                                 </ListView.View>
                             </ListView>

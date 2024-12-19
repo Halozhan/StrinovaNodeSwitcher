@@ -11,8 +11,9 @@ namespace TestCore
             LatencyService latencyService = new(latency);
             latency.Add(100);
             latency.Add(200);
+            latencyService.Update();
 
-            Assert.Equal(150, latencyService.GetAverage());
+            Assert.Equal(150, latencyService.Average);
         }
 
         [Fact]
@@ -22,8 +23,9 @@ namespace TestCore
             LatencyService latencyService = new(latency);
             latency.Add(100);
             latency.Add(200);
+            latencyService.Update();
 
-            Assert.Equal(100, latencyService.GetMin());
+            Assert.Equal(100, latencyService.Min);
         }
 
         [Fact]
@@ -33,8 +35,9 @@ namespace TestCore
             LatencyService latencyService = new(latency);
             latency.Add(100);
             latency.Add(200);
+            latencyService.Update();
 
-            Assert.Equal(200, latencyService.GetMax());
+            Assert.Equal(200, latencyService.Max);
         }
 
         [Fact]
@@ -44,8 +47,9 @@ namespace TestCore
             LatencyService latencyService = new(latency);
             latency.Add(100);
             latency.Add(-1);
+            latencyService.Update();
 
-            Assert.Equal(0.5, latencyService.GetLossRate());
+            Assert.Equal(0.5, latencyService.LossRate);
         }
 
         [Fact]
@@ -55,8 +59,9 @@ namespace TestCore
             LatencyService latencyService = new(latency);
             latency.Add(100);
             latency.Add(200);
+            latencyService.Update();
 
-            Assert.Equal(0, latencyService.GetLossRate());
+            Assert.Equal(0, latencyService.LossRate);
         }
 
         [Fact]
@@ -66,8 +71,9 @@ namespace TestCore
             LatencyService latencyService = new(latency);
             latency.Add(100);
             latency.Add(200);
+            latencyService.Update();
 
-            Assert.Equal(50, latencyService.GetStandardDeviation());
+            Assert.Equal(50, latencyService.StandardDeviation);
         }
 
         [Fact]
@@ -77,13 +83,14 @@ namespace TestCore
             LatencyService latencyService = new(latency);
             latency.Add(100);
             latency.Add(200);
+            latencyService.Update();
 
             var average = (100 + 200) / 2;
             var standardDeviation = 50;
             var lossRate = 0;
             var score = (average + standardDeviation) * Math.Pow(50, 0.01 * lossRate);
 
-            Assert.Equal(score, latencyService.GetScore());
+            Assert.Equal(score, latencyService.Score);
         }
     }
 }

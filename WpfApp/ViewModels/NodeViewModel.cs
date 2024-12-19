@@ -7,11 +7,13 @@ namespace WpfApp.ViewModels
 {
     public partial class NodeViewModel : ObservableObject
     {
-        [ObservableProperty]
         private Node _node;
 
-        public string IPAddress => Node.IPAddress.ToString();
-        public int Port => Node.Port;
+        [ObservableProperty]
+        public int _number;
+
+        public string IPAddress => _node.IPAddress.ToString();
+        public int Port => _node.Port;
 
         public LatencyViewModel Latency { get; set; }
 
@@ -20,25 +22,35 @@ namespace WpfApp.ViewModels
 
         private readonly UDPSession _udpSession;
 
-        public NodeViewModel(Node node)
+        public NodeViewModel(Node node, int number = 0)
         {
-            Node = node;
+            _node = node;
+            _number = number;
+
             Latency latency = new();
             Latency = new LatencyViewModel(latency);
             LatencyService = new LatencyService(latency);
 
-            _udpSession = new UDPSession(Node.IPAddress, Node.Port, Latency.Add, Latency_CollectionChanged);
+            _udpSession = new UDPSession(_node.IPAddress, _node.Port, Latency.AddAsync);
             StartSession();
+            //Task.Run(async () =>
+            //{
+            //    while (true)
+            //    {
+            //        await TestSession();
+            //    }
+            //});
         }
 
-        private void Latency_CollectionChanged()
+        public async Task TestSession()
         {
-            OnPropertyChanged(nameof(Average));
-            OnPropertyChanged(nameof(Min));
-            OnPropertyChanged(nameof(Max));
-            OnPropertyChanged(nameof(LossRate));
-            OnPropertyChanged(nameof(StandardDeviation));
-            OnPropertyChanged(nameof(Score));
+            Random random = new();
+
+            await Task.Run(async () =>
+            {
+                Latency.Add(random.Next(-1, 100));
+                await Task.Delay(100);
+            });
         }
 
         public void StartSession()
@@ -51,13 +63,6 @@ namespace WpfApp.ViewModels
             _udpSession.Stop();
         }
 
-        public string Address => Node.IPAddress.ToString();
-
-        public float Average => LatencyService.GetAverage();
-        public float Min => LatencyService.GetMin();
-        public float Max => LatencyService.GetMax();
-        public float LossRate => LatencyService.GetLossRate();
-        public float StandardDeviation => LatencyService.GetStandardDeviation();
-        public float Score => LatencyService.GetScore();
+        public string Address => _node.IPAddress.ToString();
     }
 }

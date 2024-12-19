@@ -14,9 +14,9 @@ namespace Core.LatencyChecker
         private byte[] _sendBytes;
 
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private Task _task;
+        private Thread _thread;
 
-        public UDPSession(IPAddress address, int port, Action<float> latencyAppend, Action notifyEvent)
+        public UDPSession(IPAddress address, int port, Func<float, Task> latencyAppend)
         {
             _ipAddress = address;
             _port = port;
@@ -28,7 +28,10 @@ namespace Core.LatencyChecker
             _sendBytes = Encoding.ASCII.GetBytes("a");
 
             _cancellationTokenSource = new CancellationTokenSource();
-            _task = new Task(() => Run(_cancellationTokenSource.Token, latencyAppend, notifyEvent), TaskCreationOptions.LongRunning);
+            _thread = new Thread(() => RunAsync(_cancellationTokenSource.Token, latencyAppend).GetAwaiter().GetResult())
+            {
+                IsBackground = true
+            };
         }
 
         private void SendData(UdpClient udpClient)
@@ -52,16 +55,17 @@ namespace Core.LatencyChecker
         // Thread
         public void Start()
         {
-            _task.Start();
+            _thread.Start();
         }
 
         public void Stop()
         {
             _cancellationTokenSource.Cancel();
+            _thread.Join();
         }
 
         // 취소 토큰과 삽입할 데이터의 콜백 함수를 받아서 실행
-        private async void Run(CancellationToken token, Action<float> latencyAppend, Action notifyEvent)
+        private async Task RunAsync(CancellationToken token, Func<float, Task> latencyAppend)
         {
             Stopwatch stopwatch = new();
 
@@ -95,8 +99,7 @@ namespace Core.LatencyChecker
                             {
                                 // Wrong packet received
                                 lossCountDuringSession++;
-                                latencyAppend(-1);
-                                notifyEvent();
+                                await latencyAppend(-1);
                                 continue;
                             }
 
@@ -104,14 +107,12 @@ namespace Core.LatencyChecker
                             if (stopwatch.ElapsedMilliseconds > 1000)
                             {
                                 lossCountDuringSession++;
-                                latencyAppend(-1);
-                                notifyEvent();
+                                await latencyAppend(-1);
                                 continue;
                             }
 
                             // Add latency to the list
-                            latencyAppend(stopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000);
-                            notifyEvent();
+                            await latencyAppend(stopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000);
                         }
                         catch (Exception ex)
                         {
@@ -123,13 +124,26 @@ namespace Core.LatencyChecker
                             stopwatch.Stop();
 
                             // Calculate delay
-                            //long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
-                            //if (elapsedMilliseconds < 200)
-                            //{
-                            //    await Task.Delay(200 - (int)elapsedMilliseconds, token);
-                            //}
+                            long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+                            if (elapsedMilliseconds < 250)
+                            {
+                                try
+                                {
+                                    await Task.Delay(250 - (int)elapsedMilliseconds, token);
+                                }
+                                catch (TaskCanceledException)
+                                {
+                                    // Handle the cancellation exception if needed
+                                    Debug.WriteLine("Task was canceled.");
+                                }
+                            }
                         }
 
+                        //// 랜덤 데이터
+                        //Random random = new();
+                        //latencyAppend(random.Next(1, 100));
+
+                        //Thread.Sleep(100);
                     }
                 }
             }
