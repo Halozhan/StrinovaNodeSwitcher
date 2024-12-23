@@ -65,7 +65,8 @@
         private float CalculateScore()
         {
             if (_latency.GetLatencyList().Count == 0) return -1;
-            return (float)((Average + StandardDeviation) * Math.Pow(50, 0.01 * LossRate));
+            // https://www.desmos.com/calculator/a5ytt48rmk
+            return (float)((Average + StandardDeviation) * Math.Pow(100, LossRate));
         }
     }
 }

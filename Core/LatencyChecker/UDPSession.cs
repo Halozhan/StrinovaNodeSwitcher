@@ -91,7 +91,7 @@ namespace Core.LatencyChecker
                             SendData(udpClient);
 
                             // Receive data
-                            byte[] receiveBytes = await ReceiveDataAsync(udpClient);
+                            byte[] receiveBytes = ReceiveData(udpClient);
                             stopwatch.Stop();
 
                             // 보낸 패킷과 받은 패킷이 같은지 확인
@@ -122,11 +122,11 @@ namespace Core.LatencyChecker
 
                             // Calculate delay
                             long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
-                            if (elapsedMilliseconds < 500)
+                            if (elapsedMilliseconds < 200)
                             {
                                 try
                                 {
-                                    await Task.Delay(500 - (int)elapsedMilliseconds, token);
+                                    await Task.Delay(200 - (int)elapsedMilliseconds, token);
                                 }
                                 catch (TaskCanceledException)
                                 {

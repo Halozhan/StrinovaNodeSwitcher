@@ -4,7 +4,7 @@ namespace Core.LatencyChecker
 {
     public class Latency
     {
-        private const int MaxCapacity = 1000;
+        private const int MaxCapacity = 200;
         private readonly ConcurrentQueue<float> _latencies;
 
         public Latency()

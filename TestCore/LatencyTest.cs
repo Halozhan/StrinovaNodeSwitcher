@@ -22,7 +22,7 @@ namespace TestCore
                 latency.Add(100);
             }
 
-            Assert.Equal(1000, latency.GetLatencyList().Count);
+            Assert.Equal(200, latency.GetLatencyList().Count);
         }
 
         [Fact]
