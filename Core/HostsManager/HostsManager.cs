@@ -42,7 +42,7 @@ namespace Core.HostsManager
                 {
                     using (StreamReader reader = new(hostsPath))
                     {
-                        lines = reader.ReadToEnd().Split('\n');
+                        lines = reader.ReadToEnd().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                     }
                     return lines;
                 }
@@ -61,7 +61,7 @@ namespace Core.HostsManager
             {
                 if (line.Contains(domain))
                 {
-                    return line.Split('\t')[0];
+                    return line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries)[0];
                 }
             }
             return null;
@@ -73,9 +73,9 @@ namespace Core.HostsManager
             {
                 try
                 {
-                    using (StreamWriter writer = new(hostsPath, true))
+                    using (StreamWriter writer = new(hostsPath, true) { AutoFlush = true })
                     {
-                        writer.WriteLine(host.IP + "\t" + host.Hostname);
+                        writer.WriteLine($"{host.IP}\t{host.Hostname}");
                     }
                 }
                 catch (Exception ex)
@@ -92,7 +92,7 @@ namespace Core.HostsManager
                 string[] lines = ReadHosts();
                 try
                 {
-                    using (StreamWriter writer = new(hostsPath))
+                    using (StreamWriter writer = new(hostsPath) { AutoFlush = true })
                     {
                         foreach (var line in lines)
                         {

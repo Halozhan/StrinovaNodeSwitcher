@@ -20,7 +20,7 @@ namespace WpfApp.Services
 
         public async Task LoadNodesAsync(string regionName, string regionCode)
         {
-            RegionViewModel regionViewModel = new(regionName);
+            RegionViewModel regionViewModel = new(regionName, regionCode);
 
             // UI 스레드에서 Regions 컬렉션을 업데이트
             await App.Current.Dispatcher.InvokeAsync(() =>

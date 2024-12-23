@@ -12,6 +12,15 @@
     <Grid>
         <StackPanel Margin="10">
             <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16"/>
+            <TextBlock Text="{Binding BestEdgeOne.Latency.Score}"
+                       Foreground="Green"
+                       FontWeight="Bold"
+                       FontSize="14"/>
+            <TextBlock Text="{Binding WorstServer.Latency.Score}"
+                       Foreground="Red"
+                       FontWeight="Bold"
+                       FontSize="14"/>
+            <Button Content="Update Hosts" Command="{Binding UpdateHostsCommand}" />
             <TextBlock Text="EdgeOne(Accelerator)"/>
             <local:NodeListUserControl DataContext="{Binding EdgeOne}"/>
             <TextBlock Text="Servers"/>
