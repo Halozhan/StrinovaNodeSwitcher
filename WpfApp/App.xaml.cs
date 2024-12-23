@@ -11,13 +11,14 @@ namespace WpfApp
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            MainWindow = new MainWindowView()
-            {
-                //DataContext = new MainWindowViewModel()
-            };
-            MainWindow.Show();
-
             base.OnStartup(e);
+
+            var mainWindow = new MainWindowView();
+            var mainWindowViewModel = new MainWindowViewModel();
+
+            mainWindow.DataContext = mainWindowViewModel;
+            MainWindow = mainWindow;
+            MainWindow.Show();
         }
     }
 }

@@ -1,18 +1,16 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Core.Region;
-using DnsClient;
+﻿using DnsClient;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net;
 
 namespace WpfApp.ViewModels
 {
-    public partial class MainWindowViewModel : ObservableObject, IMainWindowViewModel
+    public class DesignTimeMainWindowViewModel : IMainWindowViewModel
     {
         private readonly ObservableCollection<RegionViewModel> _regions;
         public IEnumerable<RegionViewModel> Regions => _regions;
 
-        public MainWindowViewModel()
+        public DesignTimeMainWindowViewModel()
         {
             _regions = [];
             Task.Run(() => LoadRegionsAsync());
@@ -22,8 +20,8 @@ namespace WpfApp.ViewModels
         {
             var tasks = new[]
             {
-                LoadNodesAsync("Seoul, Korea (the Republic of)", "kr"),
-                LoadNodesAsync("Tokyo, Japan", "jp"),
+                //LoadNodesAsync("Seoul, Korea (the Republic of)", "kr"),
+                //LoadNodesAsync("Tokyo, Japan", "jp"),
                 LoadNodesAsync("Hong Kong, Hong Kong", "hk"),
                 LoadNodesAsync("Singapore, Singapore", "sg"),
                 //LoadNodesAsync("Frankfurt am Main, Germany", "de"),
