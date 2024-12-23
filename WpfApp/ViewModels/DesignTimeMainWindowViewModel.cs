@@ -20,10 +20,10 @@ namespace WpfApp.ViewModels
         {
             var tasks = new[]
             {
-                //LoadNodesAsync("Seoul, Korea (the Republic of)", "kr"),
+                LoadNodesAsync("Seoul, Korea (the Republic of)", "kr"),
                 //LoadNodesAsync("Tokyo, Japan", "jp"),
                 LoadNodesAsync("Hong Kong, Hong Kong", "hk"),
-                LoadNodesAsync("Singapore, Singapore", "sg"),
+                //LoadNodesAsync("Singapore, Singapore", "sg"),
                 //LoadNodesAsync("Frankfurt am Main, Germany", "de"),
                 //LoadNodesAsync("Queretaro, Mexico", "mex"),
                 //LoadNodesAsync("Chicago, United States", "chi"),
@@ -57,7 +57,7 @@ namespace WpfApp.ViewModels
                 var ip = record.Address;
                 var port = 20000;
                 Debug.WriteLine($"{regionName}.{regionCode}:EdgeOne Accelerator: {ip}");
-                regionViewModel.AddEdgeOne(new(ip, port));
+                regionViewModel.EdgeOne.AddNode(new(ip, port));
             }
 
             // Servers
@@ -74,7 +74,7 @@ namespace WpfApp.ViewModels
                     var ip = record.Address;
                     var port = 20000;
                     Debug.WriteLine($"{regionName}.{regionCode}:{i}번째 Server: {ip}");
-                    regionViewModel.AddServer(new(ip, port));
+                    regionViewModel.Server.AddNode(new(ip, port));
                 }
             }
         }

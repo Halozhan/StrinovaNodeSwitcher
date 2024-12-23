@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Core.Region;
 using DnsClient;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -11,10 +10,12 @@ namespace WpfApp.ViewModels
     {
         private readonly ObservableCollection<RegionViewModel> _regions;
         public IEnumerable<RegionViewModel> Regions => _regions;
+        //private readonly RegionService _regionService;
 
         public MainWindowViewModel()
         {
             _regions = [];
+            //_regionService = new RegionService();
             Task.Run(() => LoadRegionsAsync());
         }
 
@@ -59,7 +60,7 @@ namespace WpfApp.ViewModels
                 var ip = record.Address;
                 var port = 20000;
                 Debug.WriteLine($"{regionName}.{regionCode}:EdgeOne Accelerator: {ip}");
-                regionViewModel.AddEdgeOne(new(ip, port));
+                regionViewModel.EdgeOne.AddNode(new(ip, port));
             }
 
             // Servers
@@ -76,7 +77,7 @@ namespace WpfApp.ViewModels
                     var ip = record.Address;
                     var port = 20000;
                     Debug.WriteLine($"{regionName}.{regionCode}:{i}번째 Server: {ip}");
-                    regionViewModel.AddServer(new(ip, port));
+                    regionViewModel.Server.AddNode(new(ip, port));
                 }
             }
         }

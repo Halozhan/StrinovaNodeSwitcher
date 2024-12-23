@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Core.LatencyChecker;
 using System.Collections.Concurrent;
-using System.Dynamic;
 
 namespace WpfApp.ViewModels
 {

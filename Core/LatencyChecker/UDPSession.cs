@@ -24,9 +24,6 @@ namespace Core.LatencyChecker
             // 목적지
             _remoteEndPoint = new IPEndPoint(_ipAddress, _port);
 
-            // 보낼 패킷
-            _sendBytes = Encoding.ASCII.GetBytes("a");
-
             _cancellationTokenSource = new CancellationTokenSource();
             _thread = new Thread(() => RunAsync(_cancellationTokenSource.Token, latencyAppend).GetAwaiter().GetResult())
             {
@@ -86,6 +83,9 @@ namespace Core.LatencyChecker
 
                         try
                         {
+                            // 보낼 패킷 랜덤 데이터
+                            _sendBytes = Encoding.ASCII.GetBytes(new Random().Next().ToString());
+
                             // Send data
                             stopwatch.Restart();
                             SendData(udpClient);
@@ -97,18 +97,13 @@ namespace Core.LatencyChecker
                             // 보낸 패킷과 받은 패킷이 같은지 확인
                             if (Encoding.ASCII.GetString(_sendBytes) != Encoding.ASCII.GetString(receiveBytes))
                             {
-                                // Wrong packet received
-                                lossCountDuringSession++;
-                                await latencyAppend(-1);
-                                continue;
+                                throw new Exception("Wrong packet received.");
                             }
 
                             // 핑이 1000ms 초과하면
                             if (stopwatch.ElapsedMilliseconds > 1000)
                             {
-                                lossCountDuringSession++;
-                                await latencyAppend(-1);
-                                continue;
+                                throw new Exception("Latency is over 1000ms.");
                             }
 
                             // Add latency to the list
@@ -118,6 +113,8 @@ namespace Core.LatencyChecker
                         {
                             Debug.WriteLine($"Error during UDP session: {ex.Message}");
                             lossCountDuringSession++;
+                            await latencyAppend(-1);
+                            continue;
                         }
                         finally
                         {
@@ -125,11 +122,11 @@ namespace Core.LatencyChecker
 
                             // Calculate delay
                             long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
-                            if (elapsedMilliseconds < 250)
+                            if (elapsedMilliseconds < 500)
                             {
                                 try
                                 {
-                                    await Task.Delay(250 - (int)elapsedMilliseconds, token);
+                                    await Task.Delay(500 - (int)elapsedMilliseconds, token);
                                 }
                                 catch (TaskCanceledException)
                                 {
@@ -138,12 +135,6 @@ namespace Core.LatencyChecker
                                 }
                             }
                         }
-
-                        //// 랜덤 데이터
-                        //Random random = new();
-                        //latencyAppend(random.Next(1, 100));
-
-                        //Thread.Sleep(100);
                     }
                 }
             }

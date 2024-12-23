@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Core.LatencyChecker;
 using Core.Node;
-using System.ComponentModel;
 
 namespace WpfApp.ViewModels
 {

@@ -1,8 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Net;
 
 namespace WpfApp.ViewModels
 {
-    public partial class RegionViewModel : ObservableObject, IRegionViewModel
+    public class DesignTimeRegionViewModel : IRegionViewModel
     {
         public string Name { get; set; }
         public INodeListViewModel Server { get; set; }
@@ -10,11 +10,13 @@ namespace WpfApp.ViewModels
         public INodeListViewModel EdgeOne { get; set; }
         public NodeViewModel BestEdgeOne => EdgeOne.NodeList.MinBy(node => node.Latency.Score);
 
-        public RegionViewModel(string name)
+        public DesignTimeRegionViewModel()
         {
-            Name = name;
+            Name = "Mock Region";
             Server = new NodeListViewModel();
+            Server.AddNode(new(IPAddress.Parse("43.155.138.82"), 20000));
             EdgeOne = new NodeListViewModel();
+            EdgeOne.AddNode(new(IPAddress.Parse("43.175.253.233"), 20000));
         }
     }
 }

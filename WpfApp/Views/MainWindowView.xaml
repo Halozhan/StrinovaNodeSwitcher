@@ -18,39 +18,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Margin="10">
-                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16"/>
-                            <TextBlock Text="EdgeOne(Accelerator)"/>
-                            <ListView ItemsSource="{Binding EdgeOne}">
-                                <ListView.View>
-                                    <GridView>
-                                        <GridViewColumn Header="No." DisplayMemberBinding="{Binding Number}" Width="40"/>
-                                        <GridViewColumn Header="Address" DisplayMemberBinding="{Binding Address}" Width="100"/>
-                                        <GridViewColumn Header="Score" DisplayMemberBinding="{Binding Latency.Score, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="Avg" DisplayMemberBinding="{Binding Latency.Average, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="LossRate" DisplayMemberBinding="{Binding Latency.LossRate, StringFormat={}{0:P2}}" Width="60"/>
-                                        <GridViewColumn Header="Min" DisplayMemberBinding="{Binding Latency.Min, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="Max" DisplayMemberBinding="{Binding Latency.Max, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="Stdev" DisplayMemberBinding="{Binding Latency.StandardDeviation, StringFormat=N2}" Width="60"/>
-                                    </GridView>
-                                </ListView.View>
-                            </ListView>
-                            <TextBlock Text="Servers"/>
-                            <ListView ItemsSource="{Binding Servers}">
-                                <ListView.View>
-                                    <GridView>
-                                        <GridViewColumn Header="No." DisplayMemberBinding="{Binding Number}" Width="40"/>
-                                        <GridViewColumn Header="Address" DisplayMemberBinding="{Binding Address}" Width="100"/>
-                                        <GridViewColumn Header="Score" DisplayMemberBinding="{Binding Latency.Score, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="Avg" DisplayMemberBinding="{Binding Latency.Average, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="LossRate" DisplayMemberBinding="{Binding Latency.LossRate, StringFormat={}{0:P2}}" Width="60"/>
-                                        <GridViewColumn Header="Min" DisplayMemberBinding="{Binding Latency.Min, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="Max" DisplayMemberBinding="{Binding Latency.Max, StringFormat=N2}" Width="60"/>
-                                        <GridViewColumn Header="Stdev" DisplayMemberBinding="{Binding Latency.StandardDeviation, StringFormat=N2}" Width="60"/>
-                                    </GridView>
-                                </ListView.View>
-                            </ListView>
-                        </StackPanel>
+                        <local:RegionUserControl/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

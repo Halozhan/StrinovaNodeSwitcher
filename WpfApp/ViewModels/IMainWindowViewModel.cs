@@ -3,6 +3,5 @@
     public interface IMainWindowViewModel
     {
         IEnumerable<RegionViewModel> Regions { get; }
-        Task LoadRegionsAsync();
     }
 }
