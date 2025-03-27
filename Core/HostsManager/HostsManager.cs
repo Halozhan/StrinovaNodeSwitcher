@@ -5,8 +5,9 @@ namespace Core.HostsManager
     public sealed class HostsManager
     {
         private static readonly Lazy<HostsManager> instance = new(() => new HostsManager());
-        private static readonly object fileLock = new();
-        private string hostsPath = @"C:\Windows\System32\drivers\etc\hosts";
+
+        private List<(string, Host?)> hostsList = [];
+        private static readonly object hostsListLock = new();
 
         private HostsManager() { }
 
@@ -24,99 +25,69 @@ namespace Core.HostsManager
             return instance.Value;
         }
 
-        public void SetHostsPath(string path)
+        public void LoadHosts()
         {
-            lock (fileLock)
+            lock (hostsListLock)
             {
-                hostsPath = path;
+                var fileHandler = HostsFileHandler.GetInstance();
+                var readLine = fileHandler.ReadHosts();
+                hostsList = HostsParser.ParseTextToHostsList(readLine);
             }
-        }
-
-        private string[] ReadHosts()
-        {
-            string[] lines;
-
-            lock (fileLock)
-            {
-                try
-                {
-                    using (StreamReader reader = new(hostsPath))
-                    {
-                        lines = reader.ReadToEnd().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                    }
-                    return lines;
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                }
-            }
-            throw new Exception("Error reading hosts file");
         }
 
         public string? GetIPByDomain(string domain)
         {
-            string[] lines = ReadHosts();
-            foreach (var line in lines)
+            lock (hostsListLock)
             {
-                if (line.Contains(domain))
+                foreach (var (line, host) in hostsList)
                 {
-                    return line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries)[0];
-                }
-            }
-            return null;
-        }
-
-        private void AddHost(Host host)
-        {
-            lock (fileLock)
-            {
-                try
-                {
-                    using (StreamWriter writer = new(hostsPath, true) { AutoFlush = true })
+                    if (host?.Hostname == domain)
                     {
-                        writer.WriteLine($"{host.IP}\t{host.Hostname}");
+                        return host.IP;
                     }
                 }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                }
+                return null;
             }
         }
 
-        private void RemoveHostByDomain(string domain)
+        public void AddOrChangeHost(Host host)
         {
-            lock (fileLock)
+            lock (hostsListLock)
             {
-                string[] lines = ReadHosts();
-                try
+                foreach (var (_, compareHost) in hostsList)
                 {
-                    using (StreamWriter writer = new(hostsPath) { AutoFlush = true })
+                    if (compareHost?.Hostname == host.Hostname)
                     {
-                        foreach (var line in lines)
-                        {
-                            if (!line.Contains(domain))
-                            {
-                                writer.WriteLine(line);
-                            }
-                        }
+                        compareHost.IP = host.IP;
+                        return;
                     }
                 }
-                catch (Exception ex)
+                hostsList.Add(("", host));
+            }
+        }
+
+        public void RemoveHostByDomain(string domain)
+        {
+            lock (hostsListLock)
+            {
+                foreach (var (line, host) in hostsList)
                 {
-                    Debug.WriteLine(ex.Message);
+                    if (host?.Hostname == domain)
+                    {
+                        hostsList.Remove((line, host));
+                    }
                 }
             }
         }
 
-        public void ChangeHost(Host host)
+        public void UpdateHostsFile()
         {
-            if (GetIPByDomain(host.Hostname) != null)
+            lock (hostsListLock)
             {
-                RemoveHostByDomain(host.Hostname);
+                var fileHandler = HostsFileHandler.GetInstance();
+                var serializedLines = HostsParser.SerializeHostsListToText(hostsList);
+                fileHandler.WriteHosts(serializedLines);
             }
-            AddHost(host);
         }
     }
 }

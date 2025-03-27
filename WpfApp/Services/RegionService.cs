@@ -24,13 +24,13 @@ namespace WpfApp.Services
                 _regionFactory.LoadNodesAsync("Tokyo, Japan", "jp"),
                 _regionFactory.LoadNodesAsync("Hong Kong, Hong Kong", "hk"),
                 _regionFactory.LoadNodesAsync("Singapore, Singapore", "sg"),
-                //_regionFactory.LoadNodesAsync("Frankfurt am Main, Germany", "de"),
-                //_regionFactory.LoadNodesAsync("Queretaro, Mexico", "mex"),
-                //_regionFactory.LoadNodesAsync("Chicago, United States", "chi"),
-                //_regionFactory.LoadNodesAsync("California, United States", "usw"),
-                //_regionFactory.LoadNodesAsync("Virginia, United States","use"),
-                //_regionFactory.LoadNodesAsync("Miami, United States", "mia"),
-                //_regionFactory.LoadNodesAsync("Sao Paulo, Brazil", "sao"),
+                _regionFactory.LoadNodesAsync("Frankfurt am Main, Germany", "de"),
+                _regionFactory.LoadNodesAsync("Queretaro, Mexico", "mex"),
+                _regionFactory.LoadNodesAsync("Chicago, United States", "chi"),
+                _regionFactory.LoadNodesAsync("California, United States", "usw"),
+                _regionFactory.LoadNodesAsync("Virginia, United States","use"),
+                _regionFactory.LoadNodesAsync("Miami, United States", "mia"),
+                _regionFactory.LoadNodesAsync("Sao Paulo, Brazil", "sao"),
             };
 
             await Task.WhenAll(tasks);

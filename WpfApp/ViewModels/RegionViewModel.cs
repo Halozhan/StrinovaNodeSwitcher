@@ -76,6 +76,8 @@ namespace WpfApp.ViewModels
         private void UpdateHosts()
         {
             var hostsManager = HostsManager.GetInstance();
+            hostsManager.LoadHosts();
+
             var nodeList = Server.NodeList.ToList();
             foreach (var node in nodeList)
             {
@@ -85,13 +87,15 @@ namespace WpfApp.ViewModels
                 // EdgeOne
                 string hostname = $"klbq-prod-ds-{RegionCode}{node.Number}-eo.strinova.com";
                 Host host = new Host(ipAddress, hostname);
-                hostsManager.ChangeHost(host);
+                hostsManager.AddOrChangeHost(host);
 
                 // Server
                 hostname = $"klbq-prod-ds-{RegionCode}{node.Number}-server.strinova.com";
                 host = new Host(ipAddress, hostname);
-                hostsManager.ChangeHost(host);
+                hostsManager.AddOrChangeHost(host);
             }
+
+            hostsManager.UpdateHostsFile();
         }
     }
 }
