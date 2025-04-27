@@ -81,6 +81,7 @@ namespace Core.LatencyChecker.Tests
             // Assert
             Assert.AreEqual(200, latencyList.Count); // MaxCapacity is 200
             Assert.IsFalse(latencyList.Contains(0)); // Oldest entries should be removed
+            Assert.IsFalse(latencyList.Contains(49)); // 경계값 테스트
             Assert.IsTrue(latencyList.Contains(50)); // Entries from 50 to 249 should remain
         }
     }
