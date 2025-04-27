@@ -2,7 +2,7 @@
 
 namespace Core.HostsManager
 {
-    public sealed class HostsFileHandler
+    public sealed class HostsFileHandler : IHostsFileHandler
     {
         private static readonly Lazy<HostsFileHandler> instance = new(() => new HostsFileHandler());
         private static readonly object fileLock = new();

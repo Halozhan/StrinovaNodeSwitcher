@@ -4,12 +4,17 @@ namespace Core.HostsManager
 {
     public sealed class HostsManager
     {
-        private static readonly Lazy<HostsManager> instance = new(() => new HostsManager());
+        private static readonly Lazy<HostsManager> instance = new(() => new HostsManager(HostsFileHandler.GetInstance()));
 
-        private List<(string, Host?)> hostsList = [];
+        private List<(string line, Host? host)> hostsList = [];
         private static readonly object hostsListLock = new();
+        private readonly IHostsFileHandler fileHandler;
 
-        private HostsManager() { }
+        // 기본 생성자 (싱글톤에서 사용)
+        private HostsManager(IHostsFileHandler fileHandler)
+        {
+            this.fileHandler = fileHandler;
+        }
 
         // Singleton pattern
         public static HostsManager Instance
@@ -25,11 +30,16 @@ namespace Core.HostsManager
             return instance.Value;
         }
 
+        // 테스트용 팩토리 메서드
+        public static HostsManager CreateForTesting(IHostsFileHandler mockFileHandler)
+        {
+            return new HostsManager(mockFileHandler);
+        }
+
         public void LoadHosts()
         {
             lock (hostsListLock)
             {
-                var fileHandler = HostsFileHandler.GetInstance();
                 var readLine = fileHandler.ReadHosts();
                 hostsList = HostsParser.ParseTextToHostsList(readLine);
             }
@@ -70,13 +80,7 @@ namespace Core.HostsManager
         {
             lock (hostsListLock)
             {
-                foreach (var (line, host) in hostsList)
-                {
-                    if (host?.Hostname == domain)
-                    {
-                        hostsList.Remove((line, host));
-                    }
-                }
+                hostsList.RemoveAll(item => item.host?.Hostname == domain);
             }
         }
 
@@ -84,7 +88,6 @@ namespace Core.HostsManager
         {
             lock (hostsListLock)
             {
-                var fileHandler = HostsFileHandler.GetInstance();
                 var serializedLines = HostsParser.SerializeHostsListToText(hostsList);
                 fileHandler.WriteHosts(serializedLines);
             }
